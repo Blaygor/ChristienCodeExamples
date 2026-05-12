@@ -2,7 +2,7 @@
 A curated selection of code from my projects in C and Python over the years.
 
 
-This git has three sections and two other important documents.
+This repo has three sections and two other important documents.
 
 The first section is the folder Private Teacher - This is an app I released for iOS, Android and PC. While it is unfortunately no longer available on the App stores, I include a setup installer for you to try out the software yourself - it is an English language trainer for students of English as a Second Language (ESL). Additionally, inside the Code Examples folder, are some examples of the code that runs the program.
 
