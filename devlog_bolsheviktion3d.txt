@@ -1,0 +1,3089 @@
+20-5-24
+	- Implemented pushWalls by basically mimicking what I achieved with the door code. So the effect will be achieved by using offsets, and leveraging the fact that the user will not be able to see any other side of the wall when it's being pushed in. At the end at 100%, the game replaces the offset texture with a real wall.
+	- Still having trouble rendering the offset effect, will be fixed tomorrow.
+21-5-24
+	- After dabbling with threads and not seeing much improvement, I ran the program through GCC and noticed how many threads were being created and destroyed each frame. So I have reimplemented the threading a bit, making a pool which are constantly accessed - render times immediately shot up and I gained an extra 5fps from that alone. Soon I will tackle the sprite threaded render as well using the same principles, which worked before but some z fighting was apparent. 
+	- Adding some mechanics to end a level, show an intermission screen and load a next level.
+	- Push walls are almost 100% functional now and look and feel just like Wolf3D's.
+	- Ummed and arred about getting some sort of file format to store level data from, ultimately deciding it was outside the scope of the raycaster.
+	(DONE)TODO - attenutation isn't wokring properly for audio
+	TODO - make some more constness in code - not nearly enough
+	(NOT GOING TO FIX)TODO - decals go through sprites (This might actually be ok)
+	(DONE) TODO - Saves and Loads
+	(DONE)TODO - Load config file settings.cfg
+
+22-5-24
+	- Added ability to load settings from a settings.cfg file.
+	- In addition, allowed for changed resolution and detail modes (resolution scaling) - this required a major refactor. Made RENDER_WIDTH and RENDER_HEIGHT macros to call a the renderResolution function, makes it easier for refactor.
+	- The importance of loading in settings from .cfg early mustn't be overstated. On future projects, I will design a settings loader early, avoiding #defines and allowing for bug detection etc with easy changing of the file and not having to recompile.
+	(DONE) TODO - 1 pixel underdraw for secret walls
+	(DONE)TODO - enemies see player through door
+	TODO - shoot sound and rate attached to framerate?
+
+23-5-24
+	- I considered last night only making the 3D render be affected by the "resolution scale", and in a proper game this would be what you would do, but for my purposes affecting the whole renderering pipeline is sufficient.
+	- Adding startup command line eye candy, reminiscent of Doom and Duke3D's start up.
+	- I've been really impressed by the quality of life improvements that the settings.cfg gave my programming workflow, so I've decided I'd like to implement some more:
+		- auto kill of process upon remake inside gdb (DONE)
+		- Pre-compile c files into .o, so that building a new version is very quick if I've only changed one module.
+		- set up an auto backup of raycasting-c to a zip which saves to some folder at a specified time each day.
+	- After toying around with the idea of making a dedicated mapBuffer which then gets drawn to the main colour buffer, I've decided just to keep it simple and scale sprites and textures naturally onto the screen.
+	- Bit tired this afternoon, will do some busywork to remove compilation warnings
+	(DONE?)TODO - shooting secret wall segments (during?) or after secret press gives a SEGFAULT. 
+	TODO - see about how we could record and playback demo's, using the functionality inside timer.h
+
+24-5-24
+	- After tossing it around in my head overnight, I came to the conclusion that only the 3D buffer should be scaled in quality, not the hud or menus. So after a bit of refactoring, quality now can shift and leave the hud, map and menu systems alone.
+	- 3D buffer now changes directly based on changes in detail, and the other buffers are left untouched.
+	- I am LOVING this new system where I have precompiled .o files for all my other c files. So fast, so easy.
+	- Fixed vertical push walls not working correctly. (Was a logic problem in the case in secret.c)
+	- might just leave the 1 pixel off thing for secret pushwalls as a "feature".
+
+26-5-24
+	- Made sprite.c multithreaded and refactored the code in that module, splitting it in 2 and making it slightly easier to traverse. Performance gains were marginal at best however, but I'd like to test with a high number on sprites on-screen at once.
+	- ALmost fixed the pixel fill wipes.
+	- Disabled changing detail when GAMESTATE != GAMESTATE_RUNNING
+
+27-5-24
+	- In the doldrums of a bug today that finally got fixed -- The pixel wipe function now works for all detail settings. Render pipeline is a bit messy.
+	- Rest of the day is implementing and expanding the level editor. Adding Doors, pushWalls, Exits
+
+28-5-24
+	- Further implementation and refinement of the Level editor, in preparation for adding final features to the game's C source.
+		Final map features will be:
+			(DONE)1) Routing for enemies to walk
+			(DONE)2) Key Doors
+			(DONE)3) Exit switch
+		Then we can go through the level ending screen stuff and handling next level
+		Menu stuff	
+	- Editor now capable of displaying all the placeable features of our engine.
+
+29-5-24
+	- Bug related to a segfault in texture reading wall.c had something to do with the format of the png - it was not compatible with the program.
+	- upng images must be saved in RGBA it seems - Updated texture.c to make the check and issue warnings.
+	- Waypoints are now loading into the game, refactored file.c a bit.
+	- Brightness can now be changed via settings.cfg
+	- Exit switches now function - texture changes, sound effect activated
+	(DONE)TODO - certain door sounds aren't opening properly.
+
+30-5-24
+	- Brightness is now controlled via SDL and setting the colorBufferTexture just before the final stage of the rendering pipeline.
+	- New RenderState allows for us to dim and brighten the entire game when needed.
+	- Refactored graphics.c in order to separate out the drawing functions.
+	- Refactoed main.c and split everything up in a nicer way.
+	- end lecel code is coming along. Animated sprite drawn, static characters drawn, midi changed, states changed.
+	- I tried to refactor the rendering pipeline to use blending SDL textures - i'd been initting a bunch of textures that I  never used. It was a 
+	pretty horrendous failure.
+	- Midis are now loaded by the level loading mechanism.
+	- Added level Name, number, par time to mapData.txt files. Program now reads it in.
+	- End Level screen now has increasing counter on time in level, to be interrupted and skip to the end just like doom.
+	(DONE) TODO: Refactor input.c - dedicated functions for different things.
+
+31-5-24
+	- Refactored input.c and made it more modular.
+	- Finished preliminary work on the first end level screen, we have working tickers for all metrics (time, kills, secrets, treasure)
+	- Sprite work pretty good, some half decent results, textures are going to be harder.
+	- Tried out some more render resolutions - interesting but buggy results.
+	- Thought of a cool game mechanic that wouldn't take long to implement - each level will have a secret "Romanov Dynasty relic" that the player has to hunt down and collect.
+
+1-6-24
+	- Better looking images.
+	- Almost finished level end code
+	(DONE)TODO - Fix up maps so that they're centered.
+
+2-6-24
+	- Full refactor of the map drawing code - much cleaner, streamlined, all map changes can be in one place. Map works like it should now.
+	(DONE)TODO - Add Map Names to bottom right, map num, time elapsed, kills, treasure, secrets (decided to just have map name an timer)
+	- Refactored text drawing function so it can be scaled.
+	- Redid some more sprites.
+
+3-6-24
+	- Decided to add Windows into the game, as static billboard sprites - this will be the last in-engine feature I will make. When implemented, advance game version to 0.4.
+	- After 2 hours of messing around with static sprites, I've decided that it's above my paygrade. So i'm trying a new approach using the raycaster to achieve the effect.
+	- After a further 2-3 hours of messing about, I ahve almost got it working. I have transparency on a wall, but it's not aligning properly.
+
+4-6-24
+	- Advanced program version to 0.4 - Windows have now been implemented in the game engine, and with that, the last rendering feature is complete. Looks so cool :)
+	- This is achieved by casting a ray, and making note of all windows that it traverses. Then, renderer renders the furthest hit wall, then goes back from the last recorded window hit and draws.
+	- (DONE)TODO - workout rendering kinks - 
+		(DONE)clipping textures, 
+		(DONE)sprite Z axis,
+		(DONE)doors, 
+		(DONE)pushwalls, 
+		(DONE)LoS, 
+		shooting mechanics, 
+		(DONE)Windows in windows and recursiveness
+	- TODO - Get map editor fully functioning and start build Level 1 - HOLDING CELLS
+	- Really we should be finalising texture positions, item positions in textures etc. It's going to get more messy
+	- OR think of a better way of texture planning that doesn't involve shifting numbers continuously
+		-In the doldrums with this. Deciding to create a new texture struct that keeps pertinent info about the texture together.
+	- We have 255 to work with - Which is textures, which doors, which system textures, etc.)
+	- Start planning our maps
+
+5-6-24
+	- Almost pulld my hair out over a seg fault bug. After HOURS of debugging and giving up in frustration at one point, I traced it back to me assigning a upng height as its width. I had to step through each value in the buffer position calculation
+	to discover it (including comparing the buffer size to the file size, and determining where the runoff occurred).
+	- Feels good to get my program running again. This time I have simplified the process considerably -
+		- Made a texture_t struct containing width, height, a pointer to the buffer and the texture name.
+		- modified upng.c to include the filename inside the upng struct.
+	This has allowed me to ditch a bunch of array matching which were bloating the code significantly and opening the door to mroe bugs down the line.
+	Now, we have a codified texture system with certain limitations:
+		0-4 are system textures.
+		5-69 are Wall Textures.
+		70-85 are Door and doortrack textures.
+		86-99 are spritesheets.
+		100+ are reserved for misc non-level textures (menu items, help screens etc.)
+	- Exits can now have secret exits (3rd number will refer to the next level)
+
+6-6-24
+	- Work continues bringing the editor to a working state. Really excited as now I can start designing some real levels.
+	(DONE)TODO - All map Tiles can be correctly placed
+	(DONE)TODO - Waypoints can be correctly placed
+	- Working hard to make the editor completely usable. I am not a fan of Javascript.
+	
+7-6-24
+	- Not much to say - Working very hardon the editor, but since JavaScript is not my forte, not really interesting.
+	- Map editor now functional! Already starting to find some engine bugs to fix. Development on the proper game should speed up immensely now.
+	- Fixed small bug in map editing code rendering different subquadrant triangle textures.
+	- Map now correctly renders windows, and fixed a few bugs related to the scaling factor. This now allows us to hide the gun in full screen map, and the map can draw behind the HUD.
+	- Sprites now draw behind windows correctly. - Separated the drawing threads into two distinct parts, and rendered the sprites in the middle.
+	- Windows can now see through into new windows. (Fixed rendering order by comparing distances of wall hit to Window hit)
+	- (DONE)TODO - Sprites in front of windows are rendered correctly - I think this can be done by using the amount of windows and creating "zones"
+
+8-6-24
+	-Code is very buggy right now. Here is current TODO to debug:
+		(FIXED?)TODO: raycast.c can include multiple of the same window ID - shouldn't happen
+		(DONE)TODO: renderSprite is crashing due to sprite.distance - why?
+	- This is an absolutely brutal problem. I've spent hours banging my head against the wall, and trying to debug with little success.
+	- In times like these I seriously feel out of my depth - when I feel this way, I take it back to grug basics. I start commenting every line, and abstracting out everything into functions.
+	- I often will make a new file and make getters and setters for everything.
+	- Time will tell as to whether I can fix this. UPDATE-  fixed. Grug basics and massive commenting/abstraction to functions worked a charm!
+	- (DONE)TODO: Doors can be seen through windows.
+	- (DONE)TODO: Pushwalls can be seen through Windows.
+	- As far as I can tell, all rendering problems with windows are now sorted.
+	
+9-6-24
+	- Texture creation and E1M1 creation!
+	- TODO - EDITOR: ticking blocking does nothing (This only happens if the sprite is not actively selected with the RED square around it.)
+	- TODO - GAME: Midi doesn't loop
+	- (DONE)TODO - implement key doors
+	- (DONE)TODO - implement game messages at top right of screen.
+	- (DONE)TODO - EDITOR: Enemies cannot be placed in editor.
+
+11-6-24
+	- (DONE)TODO - Reset is not resetting everything, getting some corruption - crashing
+	- (DONE)TODO - fix startup bug with a line that's massively out of bounds drawing - this causes an infinite loop for the frame in which it's being drawn, causing delays. - was caused by a bool being defined as a float.
+	- Found out you can inspect different threads inside the debugger and create void pointers and cast to different types - can Access data of many different things now!
+	- Fixed switching resolutions with new render mode for windows - was an old parameter name that was misleading
+	- (DONE)TODO - Decals not working.
+
+12-6-24
+	- Messaging system now works in-game.
+	- Sprite decals are now (for the most part) fixed and working again - it was a rendering order.
+	- Found out a way to print out a Buffer's contents into the console of gdb!
+	- (DONE)TODO - Optimise the render pipeline a little bit - especially when no windows are in frame, we can go to the simpler render pass with traditional methods
+	- (DONE)TODO - Enemies can see player through doors.
+	- (DONE)TODO - patrol routes
+	- (DONE)TODO - improve SDL input feel 
+	- (DONE)TODO - Loading textures/sounds dots in console to indicate position, same with level.
+	- TODO - Finish E1M1
+	- TODO - Work out any further editor kinks, NaN for example
+	- TODO - V1 of the chickenometer
+	- (DONE) Window hit registration - maybe we make it a 50% chance for bullets to pass through windows, 50% chance for it to richochet?
+	- Or, if it hits within the middle 40% of the window wall, it's guaranteed to pass it?
+	- Thinking about patrol routes, we can probably simplify considerably.
+		- Each route waypoint is a 64x64 tile.
+		- Each route waypoint modifies the walk direction of whatever entity goes in it, as long as they're not in chase mode.
+		- This simplifies the logic check to a simple isMapAt on each tick, and modifies the walk based on our predetermiend walk directions. Also, it can simply be stored in the map array of the .txt
+
+13-6-24
+	- Loading bars for telling you status of texture and sfx loading are now in the engine.
+	- Sprite decal bug fixed (root cause not too sure, but made a conditional check to not render invalid buffer positions). used my kickass debugging functions to figure it out.
+	- Windows now can be shot through (My solution was a tied-knot, but it worked first time to my amazement - treating decals like sprites.)
+	- (DONE) TODO - something is causing the mapLinesToDraw array to be filled (or at least report as such).
+	- TODO - Fix up FPS Metrics again
+	- (DONE) TODO - Check decal arrays better - encountering overflows.
+
+14-6-24
+	- (FIXED) Decal array getting filled up - why?
+	- TODO - on reset level,set gun sprite to its initial position.
+	- (DONE)TODO - keys don't reset when player dies.
+	- (DONE)TODO -Enemies flinching when shot should be highest priority to all other states
+
+15-6-24
+	- Spending the day on Linux today - will get cross-platform compatibility up to date, and will use Valgrind for perf and mem leaks
+	- First problem - .txt files made in windows have different return symbols etc. that Linux doesn't use. Need to include specific use cases for reading in files in Linux.
+	- FFS - why is software development this fucking obnoxious? I cannot get past the texture reading because the realloc makes the first of the array some unreadable memory address.
+	- Did a bit of error fixing.
+
+16-6-24
+	- Not sure why, but address sanitizer allows the program to continue.
+	- Accounting for situations when sound doesn't load.
+	- Fixed an out of bounds memory access write bug in drawTecturedRect and drawTexturedQuad/Triangle
+	- Today I wil profile on Valgrind to see where I can speed things up some more.
+	- Created a function that will print expected repeated values on the same line without clogging the console.
+	- Valgrind fruits:
+		- Some uninitialised values that were causing problems before (sprite->seen, sprite-> distance) now should have proper intilisations.
+		- found memory that wasn't freed (textureFileNames in textures.c)
+		- rays in rays.c is never freed in main program!
+		- decalBuffer in sprite_decal was never being freed. Freeing when decal is generally freed.
+
+17-6-24
+	- Patrol enemies now patrol properly, even when partially clipping into other sprites.
+		It will be mapmaker's responsibility not to make this look jank, there will be no clipping for sprites while in these behaviours
+	- (DONE?)TODO: Enemy painstates should be consistent. Right now only triggers behind windows... (?)
+	- Want to start to implement pathfinding for enemies today. They are going to look and behave much smarter and the game will take on a new dimension.
+	- Want to go with A* pathfinding.
+	- Got a basic implementation in, made some pen and paper simulations to solidify understanding.
+	- May as well use this situation to:
+		1) Let enemies open doors.
+		2) Use A* for sound propagation emulation.
+	- Enemies now fire through windows and can see player through windows.
+	- Fixed a bug I had introduced with walkspeed
+
+18-6-24
+	- Okay a* pathfinding file built first pass, impressive.
+	- A* is working!* Having some small issues, but enemy reliably moves toward player.
+	- Going to implement debug labels for enemies in fullscreen map.
+	- Added a way to give debug coordinates in the fullscreen map for enemies.
+	- TODO - If the map's open and a player dies, the map draws over the death effect. -- FIX: Close map upon death?
+	- So A* is working as it should, but it's obvious my spriet movement as it stands needs to be more sophisticated. Enemies are clipping on walls when they shouldn't be.
+	- (DONE?) TODO - Improve enemy LoS in hard to determine cases (edges of walls etc.) - fixed by forcing enemies into the center of the tile.
+
+19-6-24
+	- Enemy does not stop firing when LoS check succeeds despite code that should vary it up.
+	- Okay i've decided to Grug Debug the enemy code. I've refactored everything into new files for los, rotation etc.
+	- Let's map out the frame 
+
+20-6-24
+	- Refactoring the enemy logic.
+
+21-6-24
+	- (DONE) TODO - Sprite change for new rotationDraw is not being reflected quick enough when the value spriteDraw does change.
+
+22-6-24
+	- (DONE)TODO - mapLinesToDraw goes bananas, probably with an uninitialised value. -- This when msf was 0 - lines wouldn't have anywhere to draw and so went bananas
+
+23-6-24
+	- After hours and days of endless debugging, I am almost getting satisfactory results with the pathfinding. There was a bug where I was looping through sprites to find out of a blocking sprite
+	  was occupying a cell, and I was repeatedly getting answers that a cell with a barrel was not blocked. I finally realised that there were 2 sprites overlapping in that cell, and that the function
+	  looking at the first sprite, seeing that it wasn't blocking, and thus returning early that there was no block at that cell.
+	- I've also gotten the map to display the line and the path that the enemy will walk, as well as instructed the enemy to always walk to the center of the node. This is almost perfect, but not quite
+	just yet. (I will brute force this with a jank movement towards center point).
+	- Guards now open doors that aren't locked.
+	- (DONE) TODO - Full screen map after die doesn't flash the black when new level loaded.
+	- (DONE) Secrets uncovered should regenerate the node map, as the map structure has changed If not, players can go into secret areas and enemies won't follow them in.
+
+24-6-24
+	- (DONE) TODO - Returning invalid direction at certain parts of a*. This is a mapping issue - make sure no sprite is blocking single squeeze points.
+	- (DONE)TODO - Think about how to get enemy centered in tile - Brute force jank will be what I do here. Will code on the train home.
+	- Some general fixing of pedantic warning and constness.
+	- Upgraded program version to v0.5!
+
+25-6-24
+	- Fixed map rendering of multiWalls.
+	- Changed event handling from one event per frame to multiple events using a while loop - didn't know this existed!
+	- Movement now is a lot sharper and quick.
+	- Noticing sprites are disappearing with some sort of mouse input?
+	- (DONE)TODO - Sprites close up, even when transparent, tank the framerate and looks ungainly.
+	- Fix up FPS counters so I know clearly where bottlenecks are.
+	- Implemented a nice refactor based off the LBA source code I saw - using function pointer that changes depending on what detail level has been set, so we save many lines of code and millions of function calls getting the detail mode each pixel draw.
+	- If player goes out of range of an NPC's pathfinding, the pathfinding should remember the last best path to the player, get there, then initiate the bouncing off wall routine
+	- Idea - WHat if we precomputed what section of a sprite is transparent or not, and skip a whole chunk of the check routine for transparency by the pre-computation at startup?
+	- Think - Where can we preprocess data before runtime? Where am I doing the same thing over and over?
+
+26-6-24
+	- Successful implementation! Improved framerates by whopping 9-10fps in some cases (20ms per frame). We divided all sprites in a spritesheet into 4 zones and preprocessed them at startup.
+	 If there were any pixels in each zone that weren't transparent, then that zone was marked to be drawn.
+	- TODO - I still see a bit of phantom slowdown in the program that isn't the usual suspects.
+	- (DONE)TODO - player goes out of bounds or into an unreachable place by a*, enemy should still get a fix on last known point.
+	- Bit jittery, but pathfinding looks pretty solid for now.
+
+27-6-24
+	- TODO - Menu systems should be able to start a new game and quit.
+	- Refactored a bunch of code.
+	- Created some new textures.
+
+28-6-24
+	- Back to the Win 10 development environment today. Created a bunch of new textures and Sprites.
+	- tested out what I will call "fences" which are exactly what they sound like - wall textures marked as windows, but act like a fence. I will make some more code to make hit detection for these go straight through them for 100% of the texture.
+	- Playing fantastically!
+	- TODO - Dogs follow pathfinding.
+	- TODO - A* variation?
+	- (DONE)TODO - Door keys are not being saved in editor for door types.
+
+30-6-24
+	- AI thinkers have to be changed so we don't have all enemies thinkinga t once, or at least drawi	ng their lines??
+		- So implemented a simple LoS check, one line only from player to enemy. If closer, more advanced LoS cone scan will activate.
+		-
+	- (DONE) TODO: Decal arrays need debugging.
+	- (NOT DONE)TODO: Fence placement has to be really careful due to the "hack" I have used to remove the inner side wall (see transparent texture 3)
+		-I think I have to take a pragmatic compromise here and design my levels to hide this flaw in the engine that would require significant engineering to fix. It does go beyond the scope of the original idea of windows, anyway.
+	- (DONE) TODO: Avtomat weapon refire rate needs to be more refined.
+	- (DONE) TODO: MultiWall dropzones should be cleared upon clear.
+	- (DONE) TODO: Deleting Enemies/Sprites? -- Now possible by pressing the delete key when entity is selected in the editor.
+
+1-7-24
+	- Door saving code is not working in the editor.
+	- (DONE) TODO - Door locked message displays twice.
+	- (DONE) TODO - MIDI is crashing game on death.
+	- (DONE) TODO - Fences take 100% of the bullets going through them.
+
+2-7-24
+	- (DONE) Debugging the decals array today.
+		Okay so some decals are not being removed, despite being created.This seems to be hte cause of the bug.
+		What was happening is if the sprite was not drawn fro whatever reason, the timer was not increased.
+		So I changed it so the timer always increased every game loop regardless of being drawn or not.
+	- (DONE) I think I have added the ability to accurately show hit detection for bullets through windows.
+			-Actually this is not perfect yet... See TEXTURE_WOOD_WINDOW_1
+	- Many enemies in LoS all calling the costly function check LOS - Line drawing?
+	- Dogs open doors?
+	- Patrol isn't working as it should.
+	- Map can draw faster with the sprite optimisation?
+
+4-7-24
+	- (DONE) LoS checks need to be performed once a second to inform enemy behaviour, not once every frame.
+	- (DONE) Enemies should play alert sound upon spotting player.
+	- (DONE) Typing in player's angle will not allow more than one keypress (same with x, y).
+
+5-7-24
+	- Generated many new sound effects.
+6-7-24
+
+	- Today I want to process the majority of the issues with enemy pathfinding and behaviour.
+	- (DONE)Load up new, smaller sound effects to facilitate easier loading into program.
+	- (DONE) Fix up the input parameters for the Textboxes in the editor. - fixed - renderMap was being called on each keystroke.
+	- (DONE)CurrentFrame not reflecting rotateDraw/RotateMove?
+	- Enemies following same a*
+
+7-7-24
+	- Okay problem with the delay in the currentFrame is to do with "timeInCurrentFrame", this is causing a delay in the change.
+		-Fixed: Added a switch bool and if that is activated, it skips the frameDuration check.
+
+8-7-24
+	- (DONE) Enemies are not aggressive enough.
+	- (FIXED) Enemies move while in pain state.
+	- TODO - If enemies cannot move for whatever reason, instead of spazzing out, he should take potshots at player if player is in simple LoS check.
+	- (FIXED) TODO - ENEMY_STAND does not do checks every second for LoS - error was in enemy_los.c - player intersections not triggering
+	- TODO - If more than a certain distance from the player, stepChecks get larger to save processing power. (no need for high precision when player is on the other end of the map)
+	- (DONE)TODO - Window hit registration needs a revisit - Added a loop condition so if a window is found deep into the loop, it won't register a hit at the surface of the window.
+
+9-7-24
+	= (DONE) TODO - Enemy Aggression must be investigated today.
+	- a* is broken for multiple enemies - see 3rd enemy in alcove. - Ok it's to do with check blocking nodes command
+
+11-7-24
+	-This is what was causing it:
+		    bool isBlockableSpriteHere = isBlockingSpriteInCell(i, j, true);   // false if no blocking sprite found
+	Having this set to true meant that certain nodes were compeltely blocked off, and that if the enemy was static they were stuck in their tile.
+	There really wasn't a good reason to have this on, but we do need to implement a situation where if an enemy is in a tile, then the pathfinder skips that tile.
+
+12-7-24
+	- Noticed now for the 2nd time that pathfinding issues are occuring because a sprite I placed int he level is 1-2 pixels overlapping into another tile. So, I will implement a "snapping to tile" for enemies and
+	sprites, which can of course be modified but will be the default to avoid these easy to miss pathfinding issues.
+	- Now we have added some rounding for the initial placement onto tiles, which can of course be modified by the mapmaker down the line.
+	- (DONE)TODO - Federov is not synced
+	- TODO - RotationDraw for centretile alignment not always correct (Improving)
+	- (DONE) Light intensity does not get saved in the map editor, neither does map number
+
+14-7-24
+	-(DONE) Map name and midi should properly be saved now.
+	- Fixed Enemy Aggression - It was due to a bug in LoSCheckconditions - This only gets called once a second on an enemy, but the conditions to shoot should happen after 3 seconds. But deltaTime accumulation is only able to happen once per second.
+	- Now ChaseTimer will accumulate each loop of updateEnemies().
+	- Fixed ENEMYPAIN - it needed a timeInCurrentFrame reset when the enemy goes into their pain state.
+
+15-7-24
+	- Dog chomp range fixed. Dog attacking is a bit jank which will be addressed today.	
+	- Dog won't miss his bites now due to accuracy, but perhaps if the player cycles back they can avoid the bite
+	- (Fixed) Dog will start moving after chomp even if chomp frame is still occuring.
+	
+16-7-24
+	- E1M2 almost finished.
+	- Plays really nicely. As soon as I stop spazzing enemies when pathing is interrupted, I'll advance to v0.6.
+
+17-7-24
+	- More sprite replacements.
+	- Fiddling with frankensteining a few sprites from other games into my own Bolshevik guards.
+	- (DONE) End of level counter for (time, ?) should increase more quickly, and wraps around for some reason.
+	- Last known good node seems to be broken...
+		Seems to be getting set as the enemy, not the player.
+		Seem to have fixed this, it's much better now. Enemies now only getting stuck on other enemies.
+	- Completed my first enemy spritesheet for the guard.	
+
+18-7-24
+	- Fixed up the height of the guard. He was too tall before.
+	- With this spritesheet, which took about all said and told 5 hours to make, I will advance the game to 0.6.
+	
+23-7-24
+	- Spent the last 5 days on and off making the complete v1 spritesheet for our dog. It's now done.
+	- (DONE)TODO - Time timer increments correctly in the end screen.
+	- Made the bonus tickers work. Level end works nicely right now.
+
+24-7-24
+	- More sprite generation. Want to push getting the intermission mechanism sorted out.
+	- Added in map screen. Decided that conquered levels will replace the Bolshevik red flag with the russian tricolor.
+	- New levels now load from completion of a level! 
+	- Mouse now doesn't shoot in intermission screen. (In future - )
+	- Using 02 optimisation.
+	- TODO: Investigate phantom slowdown, not being detected in my usual counters.
+
+25-7-24
+	- TODO - New level load doesn't change music
+	- (DONE)TODO - New level load breaks pathfinding - I think this is because sprites aren't getting dumped?
+	- (DONE?) TODO - New LEvel Load doesn't transition with a frameDuration
+	- (DONE) TODO - New level load doesn't load in background colours
+	- Implement waving flags (DONE), red blinking squares to denote where we're going next map (DONE), next map pauses to show player which map they're entering(DONE).
+
+26-7-24
+	- Level load transition is now really smooth.
+	- TODO - Fix up all midi file playing problems.
+		- Now, Midi won't crackle and snap as it is playing alongside level loading. Loads and plays cleanly.
+		- Midis now switch between level loads.
+	- TODO - Fix up the end screen (Bonus spaces, repeated menu select sounds played)
+	- Start E1M3 - Train Station
+	- (DONE) Design and implement the flags as spritesheets.
+	- End level screen shows some nice animation with some flags denoting conquered levels, that change to the tricolor once the player has finished that level.
+	  We can also do some small map animations down the line as well - Rivers trickling, shorelines breaking, clouds moving
+	- TODO - enemies no longer give points when killed -why? They used to?
+	- TODO - 2nd end level acts funky - likely a full reset has not been performed.
+
+29-7-24
+	- Crash when speedrunning past enemies at the exit,inside the A* pathfinding. I think this is to do with leaving enemies alive chasing you, then having a map design flaw where they can't
+	 get to you, and then trying to exit to level.
+			Thread 1 received signal SIGSEGV, Segmentation fault.
+			reconstructPath (node=0xfeeefeeefeeefeee) at src/enemy_move_pathfinding.c:253
+			253             x1 = (node->col * TILE_SIZE) + (TILE_SIZE / 2);
+	- The use of static variables in my end level screen meant it became cumbersome to reset the whole module for a new end level - so I have redesisgned it using statics at the top of the .c source.
+		Fixed the issues above with the end level counter and also made it a lot cleaner to work with.
+	- Will start today to implement the normal program operation. if Argc == 1 it will go through a start up mode, displaying my software company's logo and the main title card.
+	  After that, the main menu should load up, and in the background a demo should run.\
+
+30-7-24
+	- Added company intro and intro splash screen routines for raw program load without any specific map number specified.
+	- Created cutscene.c/h and some boilerplate for this module to handle static screen loading like this.
+	- TODO - Add Demo playback capability to play.
+
+31-7-24
+	- Basic demo recording and playback capability now added! Needs quite a bit of fine-tuning but i can get input from a file to manipulate my game engine.
+	- So there's something sitting at a deeper level desyncing the inputs.
+
+1-8-24
+	- Redesigned the demo recording abilities, now events will be genereated for all keys each time.
+	- PRoblem - Some keys have analogs of each other, and if one is on (say the W key), the UP key being off isntantly switches it off.
+
+2-8-24
+	- Okay so we've made some engine changes. No longer are logic calculations also tied to deltaTime, they'll now be on fixed increments called FIXED_TIMESTEP.
+
+3-8-24
+	- So I've learnt these entirely new concepts called the accumulator and the fixed timestep, and I've had a bit of a nightmare of a time trying to shoe-horn these concepts into my engine successfully.
+	- Right now, the engine is all over the place, it runs but goes into death spirals, is patchy etc.
+	- Spent about an hour realising that this code:
+	        while (getAccumulator() >= FIXED_TIMESTEP) {
+            update();
+            deductFromAccumulator(FIXED_TIMESTEP);
+        }
+
+	has a fatal flaw: If the accumulator is lower before the first update(), the update function is never called first, and the render function has n othing to update and so hangs.
+	My fix:
+	    do {
+        update();
+        deductFromAccumulator(FIXED_TIMESTEP);
+    } while (getAccumulator() >= FIXED_TIMESTEP);
+	My first ever use case for do-while loops!
+
+4-8-24
+	-This demo recording system might actually beat me. I have been at this for days and am tying myself in knots.
+
+5-8-24 
+	- Okay we are at the grindstone - 
+	= Problem is tha tinputs are polling extra frames and spilling over, making all calculations off
+	- I've been defeated. I simply couldn't make this work conventionally. Since this project is not a commercial project, 
+	  I am simply going to take the easy way and simply record exact inputs per frame along with keyStates.
+
+6-8-24
+	- Hallejulah,praise the lord! we have a working demo file!
+	- It's beeeauuutttiful, although a bit cumbersome. We could probably get the filesize down a bit.
+	- we can finally start to move forward to the complete game state.
+	- (DONE)TODO - demo end on p parameter should drop to command line with real tics and game tics printed at the end.
+	- TODO - Demo record - should end on death + on levelexit should drop to cmd line with stats.
+	- (DONE)TODO - Some keys should be usable during a demo playback.
+		- Map, detail, escape, f10
+	- Expanded trigger functions to include an option to use levelFrames to trigger future functions - I believe this may be key in accurate shot playback. (It was)
+
+7-8-24
+	- TODO - keys don't carry over between levels
+	- (FIXED?) Segfault in a* between levels.
+	- TODO - music should loop
+	- Adjusted bullet damage profile.
+	- Created a new UI look using a sharp, dark font.
+	- Also created a Logo for the game.
+
+8-8-24
+	- (FIXED)TODO - minus and plus keys don't change resolution in demo playback.
+			 Menu keys don't operate either.
+	- (DONE)TODO - Upon normal game load,we want the splash screen to show, then after x seconds, demo and the menu should show up.
+		   - Demos should load from folder /demos, and they should play in a random order. After each demo finishes, a secondary splash screen
+		   	 with credits should display, then another demo, then splash screen 2? After this, the company log and splash screen should play again
+			 play again. This time, new demos are chosen and the whole loop continues again.
+	- Refactoring some states in game to be logically coupled in state.h - startupParameter, mapOpen etc.
+	- Refactor the starting parameters for the game.
+	- Actually, level demos will run too fast or too slow(a roughly 42 sec demo can end in 24 seconds with full speed).
+
+13-8-24
+	- Been busy for a few days, but in the meantime here's what's happened:
+	- A lot of refactoring for states.
+	- Demo now plays automatically from intro.
+	- (DONE)TODO - Regulate the speed of demo playback - on my PC when plugged in it runs far too fast, which it shouldn't do.
+	
+14-8-24
+	- Ok, I  _Think_ I have a proper intro loop established, needs a bit of polish but should work.
+	  Demo loop is established. Now for polishing...
+	  	- Some good polish now. A few transitions to fix up. Sometimes background doesn't draw correct cols.
+	-  (FIXED)I noticed that loading from demo, the ceiling colours don't load?
+		- So they're read in properly, but I don't think the buffer flashes in the demo mode?
+	- (FIXED)All demos should reset player stats in between levels.
+	- (FIXED)HUD is showing after first demo finishes.
+	- Still getting mapLinesToDraw array filling up - Not sure exactly hwat is causing it, something isn't getting flushed?? (FIXED?)
+	- Time is coming close to doing the main menu, and along with that loads and saves.
+	- With saves and loads we need to save all playerStats, most of the player info, and all active enemies and things in level.
+
+15-08-24
+	- FIXED - Timestep should now be accurate regardless of CPU speed. This was due to my use of a do-while loop, which would mean that the game would
+	  be forced to update once every game loop REGARDLESS of whether it was ready.
+	- New input mode = -1, no input at all allowed. This will be applied at the Pelican Blue Software splash.
+	- FIXED - Ceilings/floors draw correctly. Music fixed. Automap closes automatically at end of demos, messages cleared after demo finish.
+
+17-08-24
+	- New font to replace the old Wolf3d one.
+	- New Difficulty icons.
+	- New Splash screen/
+
+18-08-24
+	- Menu now has headings.
+	- Difficulty icons now implemented in game, along with difficulties to choose from.
+
+19-08-24
+	- Now players can start a new game using the in-game difficulty selection. BOLSHEVIKTOR mode starts the user at half health and with half the bullets, as well as some other gameplay tweaks.
+	- Draw menu now returns a new enum MENU_ACTIONS, which the main.c handles as it has complete control over the scope of the game, whereas menu.c is very limited in what it can access without some forward decl shenanigans
+	- (TODO) Starting a new game while a demo is running is not working properly, will fix.
+	- TODO: Why do midis still crackle when a new one is queued up? Seems unprofessional and sounds amateurish.
+	- (DONE)TODO: Tonight working on the main menu, allowing modals for sliders.
+		- God menu.c is a rat's nest.	
+	- After quite a bit of fiddling and refactoring, I can get a bar drawn on screen.
+	- (DONE)TODO: Menu Titles should always be centered.
+
+20-08-24
+	- Nice code refactor this morning shortened codebase by several hundred lines, made several constants computed once to save processing power and made code more const correct.
+
+21-08-24
+	- SFX volume now processes correctly.
+	- Brightness slider now works and modifies brightness correctly!
+	- Resolution and Volume sliders now work and modify correctly as expected (Albiet a bit code-heavy in input_fns.c)
+	- (DONE)TODO - Menu escape key should go up one level but is getting out of the menu.
+	- TODO - Occasional fuckup of the renderer when changing render resolutions.
+	- (DONE) TODO - settings.cfg should save once the out of the options menu.
+	- (DONE)TODO - Implement Quit and some cheeky options goading player back ala Wolf3D.
+
+22-08-24
+	- (DONE)TODO - Extract a general pixel drawing function to further reduce code bloat when drawing things to screen.
+
+23-08-24
+	- Menus are much more work than they seem. Really nothing is left automatic, everything must be programmed manually.
+	- Quit now displays a modal with a random taunt, and a YES/NO dialog to quit game. Pressing Y or N will also work.
+	- Menus now work really well, and with the exception of Loading and Saving game, everything works as expected.
+	- Gonna do a checkpoint here, and advance the version to 0.7. Now I'm going to embark upon tightening the code up so i'm not constantly repeating boilerplate code.
+	- Successful refactor has reduced code by 15% in some files, now using drawFromTexture().
+
+24-08-24
+	- (FIXED) TODO - Music volume modified from main volume.
+	- (DONE) Today We'll save the settings.cfg file.
+
+26-08-24
+	- Started mapping out the save file and the data we'll need to save. Creating new arrays to hold the original level data that can be compared with current level data, and if any changes
+	are noted that is put into the save file.
+	- Some very nice optimisations and further refactoring.
+
+27-08-24
+	- Work has started on solidifying a save game file format.
+	- Populating a save game variable with appropriate differences from original and current sprite and enemy arrays.
+
+28-08-24
+	- Work continues - Serialising save data today.
+	- My god saving and loading is a whole other pandoras box I'm opening. This will take days to implement.
+	- Okay - Function to serialise game data is finally complete, at least in conception. 
+
+29-08-24
+	- Okay it compiles alright!
+	- (DONE, but only save does something atm)TODO - Assign F5 to quicksave, F9 to quickload.
+	- TODO - write a quick program that can read the contents of the loaded save file to the console, separate from the main game. THis will allow quicker debugging of the code.
+	- Actually just gonna test inside program with breakpoints - I can successfully read back in a save file (Files are like 200kb! (mostly color buffer)), and when all checks are satisfied, I'll connect it up to a level load.
+	- Well, you win some dev offshoots and you lose some - I think I am just going to store the enemies and sprites arrays in the binary of the save file - it's not worth that added complexity otherwise. I had some fancy code
+	would try to differentiate between the two but it ended up being a dead end, as the game is constantly recalculating inside this array, reshuffling it etc.
+	- Updated the file pool code so now I have two pools - one for demos and one for save files.
+	- Let's make it so I can see the files when I go to load 
+	- Let's also get a successful level load of a save from a file.
+
+30-08-24
+	- Screenshot is now redrawn on screen! Now we are simply sampling from the main buffer and saving that to a save file, halving the normal resolution. Looks fine in menu.
+
+1-9-24
+	- Some further refactoring and constness-ing. Strings can now be different colours. 
+	- Fixed level time issue.
+	- Load game screen almost done, needs a bit of tweaking.
+	- TODO - in msf 0.2, lines outside of boundaries still draw onto the buffer.
+	- TODO - Map - overdraw on window tiles?
+	- TODO - Map - Some items visible before being seen?
+	- Some menu UI visual improvements.
+	- Today - Load in a save game.
+
+2-9-24
+	- Doors must be saved as well - forgot that.
+	- Everything is basically hooked up, now to see a successful level load.
+	- WOW! First go, everything loads - new level loads immediately. Will proceed to do some tests.
+	- Getting save screen in menu good.
+
+3-9-24
+	- Continuing save menu code.
+	- Want to implement arrows for moving up and down the modal for loads and saves, and others.
+		- Arrows now draw, but now they need to light up when there's more to scroll, and not when there's no more.
+		- Now they roughly light up, but the yonly need to light up when there's more to draw. Additionally, new save slots need to load in place of others if there's a bigger list.
+		- Ok game saves successfully through the menu, creating a new file.
+		- TODO(DONE) - Game overrides old save.
+		- Menu behaves appropriately, loading in new saves as it goes.
+
+
+==============================================================
+Starting today, I'm going to implement something similar to Carmack's .plan files:
+Prefix 	    Meaning
+No prefix 	mentioned but not fixed or implemented on that day
+* 			completed on that day
++ 			completed on a later day
+- 			decided against on a later day
+==============================================================
+
+4-9-24
+
+	* Map lines drawing out of bounds in msf 0.2
+	* Saves and loads fill up a max 2 spots at a time in menu and intelligent scroll
+	* Saves can overwrite old files.
+	* Certain map tiles are bigger than others for no reason. (Check if that +3 in drawMap_rectangles)
+	+ Player movement needs to slide down the walls
+
+5-9-24
+
+	* Mouse integration with menu UI elements
+		*- Main Menus
+		-- Sliders
+		+- Binary dialog.
+	+ Mouse rotation removes sprites from 3D Buffer.
+	+ Mouse movement should be smoothed and linked to X axis sensitivity from settings.
+	+ Mouse readings in demo files. (Really only needing left click to shoot)
+	- Slider type has a click box
+	+ Control menu option to use mouse to control (changing A and D to auto strafe.) (maybe making this default?)
+
+6-9-24
+
+	* Unselected drawn menu items rendered grey.
+	* X axis sensitivity slider support in menu.
+	* Fullscreen boolean slider support in menu.
+	* Render mode slider support in menu.
+	* Always run support in controls (and in menu)?
+
+7-9-24
+
+	+ Demo record mode shouldn't display startup logo
+	+ Demo record doesn't accept inputs
+	+ apply buffer zone to horz/vert movement sliding
+	* always run setting isn't being loaded
+	+ exit taunt string should be centered
+	+ always Run option menu not working/applying
+
+8-9-24
+
+	== COMMENT ==
+	Making smooth sliding along walls was far trickier than I initially expected, but it boiled down to simply prohibiting movement along one axis,
+	to not also the buffer zone to be penetrated.
+
+9-9-24
+
+	* Caps lock and always run mode should work in concert.
+	* Hide mouse cursor in-game when mouselook is enabled.
+	* new Movement code clipping through locked doors.
+	* no further mouse movement possible when at edges of screen.
+	+ blocking sprite gliding is not perfect - see 1st hallway barrel -- This is important as players can enter areas they shouldn't with it
+	- shift key should downshift when always run is on.
+	* Intro loads as normal for both demo record and playback.
+	+ Demo loads sequences should be random.
+	+ Loaded games in the same level should not restart the music.
+	+ Quickload does not load the game.
+	+ Sound starts again when level loads from next level queue.
+	+ Menu modal should close after new game selection
+	+ New game should start with a fade out and fade into new game.
+	+ End level screen needs a facelift re. new font, code organisation.
+	+ Player shouldn't keep keys from level to level.
+
+	== COMMENT ==
+	The weird "sprite disappearing bug" is definitely nestled within findVisibleSprites().
+	Okay bug fixed, I simply hadn't been normalising mouse angles (but turning angles with keyboard were).
+	Refactoring the main function to make an easy-to-understand launchpad.
+
+10-9-24
+
+	+ Royal treasure is not getting saved in saved games.
+	* Save games should handle the royal treasure as well.
+	* Implement royal treasure in end level screen.
+	+ Flags are not updating when a level has been conquered.
+	- Games cannot be loaded during intermission screen.
+	* Buffer overflow when going into the loading screen too quickly and trying to load a save
+	+ Level read fails should exit the program entirely. 
+	+ (quick)loads don't redraw the BG_STATIC buffer (if they're loading from a different level).
+	+ Improvements needed to the music module.
+	+ New texture needed, (64*9) * 64, for the higher res versions of the royal treasures.
+
+	== COMMENT ==
+	Refactoring level_end_screen.c for conciseness and clarity, and in line with rest of program.
+
+11-9-24
+	+ Picking up the gold key deactivates the silver key in the UI.
+	* If ammo goes above 99, UI doesn't display it.
+	* End level screen is not resetting.
+	+ Train station red flashing square should be better centered/with better proportions
+	+ Weapon firerate, and their sprites, should be on FIXED_TIMESTEP
+	+ 3rd Enemy type should be designed now, holding a Avtomat.
+	- Left click for save and load games loads and saves a game appropriately.
+	+ Pathfinding from level to level doesn't reset 100% correctly?
+
+	== COMMENT ==
+	Working on sprite sheet for 3rd enemy type. It's time consuming, but needs to be done.
+
+12-9-24
+
+	== COMMENT == 
+	Sprite sheet about 15%, 33% done, 60% done. 80% done.
+
+13-09-24
+
+	* Add in 3rd Enemy Type.
+	+ Third enemy type, Elite guard, fires burst of three bullets.
+	* They also run somewaht faster than the regular guards, and have 50% more hp.
+	* These guards will drop an Avtomat upon being killed.
+	* If player already owns Avtomat, they can stll pick up weapon as long as their Ammo < 99.
+	* Do not inform player of acquiring the gun in messages (instead inform of clip), nor do grin face.
+	+ ENEMY_ELITE should be shorter slightly.
+	+ Change colour of weapon in UI.
+	+ Ranged enemies don't come within 1 map unit of player ever and just keep taking pot shots at player. (stops them looking like giants).
+	* Spritesheet initial done.
+
+14-09-24
+
+	+ Pistol spritesheet replacement.
+	* Secret walls shouldn't intent into walls.
+	* Saved games don't save sprites and wall pieces seen on the map already.
+	* Saved games don't save Window seen status.
+	+ Since dogs can't open doors, they are perpetually stuck trying to access player.
+	* New sprites for UI keys, fix their positiions in UI
+
+	== COMMENT ==
+	Indentation bug that's been present for months is in pushWallLogic, line 426.
+	Bug fixed. Ended up taking me 6 hours for something fairly simple - horzHit or vertHit snapping walls to grid.
+	That had been an engine bug for at least 4 months.
+	
+15-09-24
+
+	+ Loading a game after finishing a level doesn't reset the level end screen.
+	* Disable clicking to save game when level end screen is in effect.
+	+ Menu should pause level end screen's tickers.
+	+ Space bar should advance tickers, and spamming it should finish tickers early.
+	+ Handle game loads during intermission (Disable menu action entirely)
+	* After the main tickers, we should have a sound effect and a highlight if a piece of royal treasure has been found.
+
+16-09-24
+	* Cheats are going to be added into the game.
+		* pbdqd - invincibility
+		* pbclip - clipping disabled
+		* pbinvis - enemies don't react to player.
+		* pbkfa - all keys, 99 ammo and all guns
+		+ pbitem# - adds an item to a player.
+		* pbdt - all map discovered.
+		+ pbclev# - change level
+	- Bolsheviktion 3D blue drawing in console at program start sometimes stops drawing after the text is drawn.
+		(This seems like a bug inside MSYS, not worth fixing)
+	+ pbclip causes segfault from a* pathfinding.
+	+ Enemies don't obey patrol waypoints.
+	+ Sound propagation for aggroing enemies
+
+	== COMMENT == 
+	What a painless implementation - cheats should've been added MUCH earlier in development cycle for testing.
+
+17-09-24
+	* Patrol from South walking north doesn't work properly.
+	+ Use BFS to implement sound propagation in sndpropagate.c
+		* - Basic implementation compiles.
+		* - Sort out segfaults
+		+ - Handle doors.
+
+	== COMMENT == 
+	Patrols are in much better shape now, but took hours of debugging and headscratching.
+	Sound propgation is almost in engine, shouldn't be too taxing on the system.
+
+18-09-24
+	+ SndPropagation:
+		* - Handle windows.
+		* - Aggro enemies.
+		* - Handle depth.
+		+ - Reload propagation map on map edits (i.e. secret pushwalls).
+	* Sprites are not drawing on first pixel at top or the left of screen on lower quality settings.
+	+ ENEMY_ELITE should dance using the 2 frames reserved for them while being hit.
+	+ ENEMY_ELITE should drop as soon as their hp reaches 0. (fixed with 24-9 sndpropagate fix)
+	- drawBox/Draw line doesn't draw a complete box. (Good enough)
+	+ Consolidate level loading code into one function.
+	+ Load level loading on a function trigger
+	+ Load 2 -> load 1 -> end level (level 2 still loaded into end level screen)
+
+
+	== COMMENT ==
+	As level loading code refactor will be quite a major restructure of the code base, I'll do a code checkpoint here.
+	Hopefully after the refactor we can standardise the ideas of clearing memory, fading in and out, and music loading.
+	When testing, we must check for:
+		Fade to and from black.
+		Music loading.
+		Memory leaks
+
+19-09-24
+	+ Loading games from regular game intro loop continues demo play.
+	+ Dogs, if they have no LoS, Should bounce around like nutters off the walls.
+	+ Functions with only internal linkage should only be static
+
+20-09-24
+	* In lower resolution mode, messages at top of screen are spread out disproportionately.
+	* Unlocking a locked door retriggers pathfinding grid rebuild
+	* All weapon frame control is under a constant.
+	+ Inlining and static:
+		+ attack
+		* enemy_move_pathfinding (Massive init speedup)
+		* sndpropagate
+		* textures (3-5% ish speedup)
+		* wall_window
+		* hud
+		* utils
+		* enemy_move
+	+ Lower resolution modes perform worse (??? very strange)
+	+ Hud in lower resolutions have a small gap between the bottom and the HUD (rounding error)
+	* Dogs no longer get stuck at closed doors.
+	* Enemies should no longer get stuck and glitch out in position.
+	* Time in dying frames sped up. (0.15->0.13)
+	* Enter spamming should get players straight into a new game with medium difficulty mode.
+	* Labels in load game (and save game) are not aligned if not using default resolution.
+	* Sound Effect load in the console are missing some #.
+	+ Save game, when left open and demo ends, will start to show menu saving options.
+	+ Fix save and load game screenshot ratios.
+
+	== COMMENT ==
+	Obstruction flag?? - Modifications need to be made in enemyChase for dog behaviour.
+	Ok we can set a flag to not run a*, but rather bounce off walls as default, for x levelFrames.
+	After the counter reaches 0, we try again using a*. This is effective and is good enough for this game.
+
+21-09-24
+	* Ambush flagged enemies should not be awakened by sound propagation.
+	+ Difficulties should be added in game/editor.
+		* - Added into editor.
+		+ - Enemies faster and have more hp.
+		* - Specific difficulty flags for objects/ enemies to appear/not appear (default appear all)
+		+ - Starting hp and bullets less.
+		+ - Points gained increased or decreased.
+		+ - Enemies do more (or less) damage.
+		+ - Save games track difficulty (and are displayed in the save/load modal)
+	* Add elite to editor.
+	+ Diminishing damage based on distance.
+	+ Perfect the HUD face and draw a few more reduced health passes.
+
+22-09-24
+	+ Editor not flushing old windows
+	* Editor not loading in previous skill settings.
+	* Save game is available during GAMESTATE_INTRO & GAMESTATE_RUNDEMO_1, GAMESTATE_RUNDEMO_2
+
+23-09-24
+	+ What happens when lives reaches 0? (HI SCORE table?)
+	* Work on face array (80% done)
+	* Selecting Bolsheviktor disables all input
+	- Debug text (using SDL_TTF) should be scaled according to resolution.
+	+ Enemies are no longer flinching (or flinch time is too long)
+	* Halve ENEMY_ELITE damage output
+	* Starting bullets should be just what is in a standard NEGANT clip. (7?)
+	* Tweak player damage
+
+24-09-24
+
+	* Reset game correct ammo
+	+ if a settings.cfg is not found - generate one, corrupted - regenerate
+	- Elite guards zig-zag in pathfinding instead of finding the shortest possible route.
+	* Editor: Choosing a new enemy type does not update the sprite.
+	* Get rid of the "animated" parameter in enemy_t - it's deprecated.
+	* Level 1 has a lot of features exclusive to hard and bolsheviktor mode.
+	* Buffer overrun when reading in very long level strings.
+	* Editor: Adding new doors saves as undefined if not chosen from dropdown.
+	+ Knife can be spammed too quickly.
+	* Doors shouldn't close on corpses.
+
+	== COMMENT == 
+	Very strange - attacking with a knife triggers appropriate pain state, but shooting them does not.
+		Possibility 1 - Something is disabling ENEMYSTATE_PAIN just after being set in loop.
+	Ok what was happening was that sound propagate was picking up the bullet fire, and "awakening" the enemy again.
+	Placed some conditions to forbid "reaggroing" enemies already aggroed.
+
+	It's really playing like a closer and closer polished game. It'a actually quite fun.
+
+	Musing on different timers in game:
+		getTicks() is for performance calculations and cosmetic randomness.
+		getDeltaTime() is for timed operations in game (i.e. menu interaction)
+		getLevelFrames() is for deterministic level engine activity.
+
+25-09-24
+	Upgrade a* - 
+		* priority queues
+		movement patterns
+		* memory allocation efficiency.
+	- Enemies don't draw at the first y pixel, similar to sprites before at very low resolution (Fixed/not important)
+	+ sndpropagate freezes the game while processing (was a bug in the weapon drawing code)
+	* Pain state slightly reduced in duration
+	* Finally update timers to analyse performance on modules.
+	* Rip out SDL_TTF and use internal text drawing functions to BUFFER_UI & perfmeasure.h
+
+	== COMMENT ==
+	Now all text in game has no dependencies, rendering straight to buffer. So that means I can remove the SDL_TTF library
+	as it is no longer needed.
+
+26-09-24
+	+ Disable cheats for Bolsheviktor mode.
+	* Fix blood decals.
+	* Precompute common calculations for defs.
+	* Implement extra life pickup
+
+	== COMMENT ==
+	Blood decals are not being considered as visible. Turns out there was a bad value flipping the x and y to negative.
+	Continued work for E1M3 - Introduce the Elite guard.
+
+27-09-24
+	* 40% speedup in renderColorBuffers() by precomputing bools that won't change in loop
+	* 20% speedup in renderWallProjectionThread().
+	* Big speedup in drawRect due to direct buffer manipulation
+	* Various speedups in graphics_draw.c and all pixel drawer functions
+	* Scale map in small resolutions
+	* Zoom map in and out
+	+ Demo recordings, when you die, should end the recording.
+	+ Demos not taking into account weapons switches using keys.
+	- Weird artifact of an arrow on demo record (Demo record not going to be in final release)
+	* When at 0 ammo and ammo is picked up, player switch to pistol.
+	+ Starting a new game when there's already an active game should prompt a yes/no dialog.
+	* Map lines drawn are drawn in old code.
+
+	== COMMENT == 
+	After hours of debugging, we finally have an enhanced map that scales with resolutions. I also took advantage of the refactor
+	to add map zooming in via <> keys.
+
+28-09-24
+
+	+ Implement invisibilty and invincibility into the game.
+		+ Invisibilty should add a masking effect over the weapon sprite	
+		+ invincibility should modify BUFFER_3D to be fully white.
+
+	- Segfault in sprites when recording demo and changing detail:
+		Thread 1 received signal SIGSEGV, Segmentation fault.
+		0x00007ff753fb2b92 in drawSprite (renderSprite=renderSprite@entry=0x5ff9f0) at src/sprite.c:416
+		416                         texelColor = renderSprite->textureBuffer[texWidthByTexOffsetY +
+		(Never could reproduce this)
+	* Double shot fired with mouse click.
+	+ AVTOMAT sometimes skips over fire frame.
+	+ Shadow on ammo box sometimes clips and glitches on lower details.
+	* mouse zooms in via mousewheel the map.
+	+ Level end tickers play snd effect too slowly.
+	+ Starting new game from main screen demo does not change the level number.
+
+	== COMMENT ==
+	Sndpropagate glitch from 25/9 is very strange. It seems to cause backlog in A* processing. Disabling map helps.
+	Demo has some very minor desync issues, and I suspect it's how demos are processed that are causing this.
+
+29-09-24
+	* Implemented invincibility
+	- Some doors are staying open even when they shouldn't (see map03) (Sprite placement near these doors)
+
+30-09-24
+	* Implemented invisibility - adapted from Carmacks' Doom invis idea (fuzztable)
+
+1-10-24
+	* Fixed a few out of bounds access bugs
+	* Invincibility doesn't display in full map mode.
+	* Add padding to system messages.
+	* map level info x pos needs to be correctly positioned.
+	* Map enemies should correctly face their cardinal positions (not relative pos to player)
+	* F10 during gameplay should open a confirm window.
+	* Rough Complete E1M3 with some new textures
+
+2-10-24
+	* Program version now 0.8.
+	* Code tightened up.
+	* E1M3 v1 finished.
+
+3-10-24
+	* Decal duration shortened, runs tighter.
+	* Reset level resets music twice
+	* Double midi playback
+	* Dying in demo record stops record
+	+ new cutscene with message writing - like Doom intermission
+	+ L/R attenuation for sound effects
+	+ Demo desync with amount of generated events
+	* Demo structure simplified
+	+ Demo mode on death fades to red, only THEN back to menu or quit game
+	* Sound effects play through fn pointer
+
+	== COMMENT ==
+	Two extra frames are being written into the demo at the end of recording. Don't know why.
+	Going to redo the demo file structure, "events" and "frames" are too confusing.
+	Simplified syntax quite a lot for demos.
+	Playback of demo with 'p' parameter can linger for x second after death before quitting back to screen
+	going back to main game intro loop.
+
+4-10-24
+	* Error sound effect.
+	* Simplified and added spatialisation to sound effects.
+	* Generated more items and textures. Prepare to draw E1M4.
+	* Decal buffers draw bizarre colours at low resolutions.
+
+5-10-24
+	* On death with regular mode doesn't kill music.
+	* On death goes back to main when it shouldn't.
+	+ Hi score on 0 lives left.
+	+ E1M1->E1M2 die (no music stop, no death sound effect)
+	+ EndLevelScreen not being given new information.
+
+	== COMMENT ==
+	Refactored into death.c and death.h to modularise this buggy feature and make it easier to debug.
+
+8-10-24
+	+ Implement Hi Score screen and hook up 0 lives to it.
+	+ Level start from command line still does a fade-in like it was rendering the company logo.
+
+9-10-24
+
+	* Texture loading line print doesn't print last # for certain texture nums.
+	+ GAME OVER cutscene
+	+ Story so far Cutscene
+	+ Level string selection from command line shouldn't segfault - kill program if not found.
+	+ Kill pathway from reading functions all the way up to main game loop.
+
+10-10-24
+	+ When enemies die in map, they don't display their death frames.
+
+11-10-24
+	- Create a default map that loads when it cannot find other maps. (E1M0.txt)
+	+ Saves should be sorted by their most recent first
+	* 7-8% fps gain for drawPixel refactor
+
+13-10-24
+	
+	On game over - check if total score eligible for top 10 scores.
+		+ if so, add it in.
+		+ if not, show YOU as a temp 11th slot on the high score table.
+
+14-10-24
+
+	+ Make sure all game modes, when 0 lives (either from command line or regular start) exit gracefully and load main demos.
+	+ Test writing of the high score and reading to file.
+	* Darken the game over image
+	+ Finalise the static HUD colours
+	* Loading game while demo running carries over input mode
+	* Loading game while demo running processes ghost frames
+	* Loading game while demo running can carry over keyStateFire
+
+15-10-24
+
+	+ After high score, main intro loop not rendering
+	+ E1M4 blueprint
+	- EDITOR: Clearing Patrol Waypoints bugged.
+	Horizontal sprite check not passing
+
+16-10-24
+	* Rendering bug in BUFFER_3D in level select from cmd line
+	Enemy movement overhaul:
+		* - Enemies now dice roll attacking again only when not in player range.
+		* - Enemies in closest range to player will continually attack.
+
+17-10-24
+
+	+ Music stutters when repeating
+	* Disable render quality changes during death
+	+ Main volume doesn't immediately attenuate music
+	* Fix pixel overflow in low details for sprite drawing
+	* When switching from keyboard to mouse+keyboard, sensitivity should be auto adjusted
+	* Story so far modal access, Keyboard skipping
+	* New game from game over and pre-loaded level crashes as it can't find a levelNum
+	+ Occasional segfault in loading game menu:
+		Count: -17891602
+		NewSave: -17891602
+		Thread 1 received signal SIGSEGV, Segmentation fault.
+		drawFromBuffer (srcBuffer=0x0, destBuffer=BUFFER_UI, originalWidth=160, originalHeight=90, newWidth=160,
+			newHeight=90, startX=139, startY=272) at src/graphics_draw.c:525
+		525                 const color_t texel = srcBuffer[srcYByOriginalWidth + srcX];
+	* Level name should be always run through uppercase maker.
+	+ Doors and windows seen on map before officially seen.
+	+ Intermission screen design. (To be played between M4 and M5)
+
+	== COMMENT == 
+	It seems like calculations are incorrectly accessing an earlier part of the object texture, specifically the medkit texture.
+	Bad access to (2687, 60) on the long texture.
+	Bug fixed.
+
+18-10-24
+
+	* Add custom soundfont loading support and choice via settings.cfg.
+	* All map elements now are discovered properly at the right time.
+	* Cap Map zoom
+	+ Segfault at invisibility pickup
+
+	== COMMENT ==
+	I suspect that we're not returning early for some raycasting conditions properly, thus we're exntending checks further than we need to.
+	Once fixed, Windows and doors should stay hidden, but also, there should be a performance boost we we're not casting over what we can see.
+	Okay the issue is this: Both rays are cast - vert and horz rays. One is always discarded. BUT, the one that is discarded still triggers the window and
+	door to be seen, even if it's not chosen as the final ray.
+	solution: Move the window and door seen checks to after we have chosen our ray.
+	Each wallHit_t keeps a record of the windows it hits. Make modifications to keep record of doors hit as well
+	Bug fixed.
+
+19-10-24
+
+	* Code speedups
+	* Added NULL check to wall.c texture retrieval.
+	* Increase window retrieval time by storing array of pointers to windows.
+	+ Add early exit conditions for broken maps etc. with exit() function.
+
+20-10-24
+
+	+ Some window render corruption issues in BUFFER_3D and  * BUFFER_MAP
+	* Allocate more audio channels for playback
+	* getSprite() huge optimisation.
+	+ Player can interact with doors while inside them, breaking them.
+	* Cheeky toilet easter egg.
+	* New sound Effects for enemy guard and enemy elite.
+	+ Player can glide through closed doors (See E1M1 secret treasure room)
+	+ Shooting non-aggroed enemies skips their aggro sound.
+	+ Window FPS drops can't be seen in the perf meters for some reason. (See E1M3 secret train)
+
+21-10-24
+
+	* Rendering of invuln in menu flickers.
+	+ Train station end switch are back to front.
+	* If an invuln is picked up in one level, then the next level will still render that effect.
+	* Sprites are not picking up well. (improved)
+	* in end Level screen, all level names must be rendered all caps.
+	* Large number of new sound effects for guards.
+	* Implement fast door retrieval from grid matrix, similar to window.
+	+ Rework level end knifeswitch texture
+	* AVTOMAT v1 hud weapon
+	* Saved sprite array is not saving/loading properly.
+	+ Pathfinding isn't working too well. (acceptable, not perfect now.)
+	+ Set gun to original position upon death.
+
+22-10-24
+
+	* new typedef - uint - unsigned int
+	* 40% speedup in ray_window.c
+
+	== COMMENT == 
+	Midi stutter on replay is due to the fact that fluidsynth is loading the file again from memory. Since Fluidsynth likely is multithreaded,
+	the game advances 2 or 3 frames during that load. And thus, for 2 or 3 frames, the last part of the buffer is played,
+	hence stutter.
+
+	This wasn't the case. I think this signals time I learned about the midi file structure.
+	Midi file structure and manipulation is a waste of precious time right now.
+	Bug fixed. I had to create a custom callback function that seeks to 0 when one tick away from finishing the song.
+	New sound effects and looping music finally give the game some AURA
+
+23-10-24
+
+	- Increase MAX_WINDOW_HITS (Short term solution) (Fixed underlying issue)
+	* After loading game, Menu's selector cursor is off (not reset from the load menu).
+	+ Code refactoring in raycast.c to fix window errors.
+	* Slowdown when not firing for a long time and then firing.
+	* Sound effects beefed up for weapons.
+	* Decals should go into render order.
+	+ This can probably be pre-computed in ray.c:
+		const float fishEyeFix = cosf(ray->rayAngle - player.rotationAngle);
+	+ Segfault in decal on lower resolutions (320x200)
+	+ Weapon sprite off center in lower resolutions.
+	* Music does not play on reset.
+	+ start from level -> die to end of game -> demo loop -> after first demo, game quits
+
+	== COMMENT == 
+	Decided to find out source of phantom slowdown __on fire of weapon__. A knife does not slow down.
+	Problem seems to be in animateWeapon()
+	Okay - I think it is not that function per se, but the calling of that function is going wacko - drawing many times more
+	than needed.
+	Yes that's the problem - 333 calls of this function when the weapon is fired. SO there is a logic error calling this function/.
+	Bug is in animateWeaponSprite();
+	Bug fixed.
+
+24-10-24
+
+	* All ray variables are now precomputed at the beginning of the pipeline.
+	* Scrubbing code clean using very strict compilation settings.
+	* Weapon draw can skip at least 25% of y segments of the weaponsprite as nothing will ever be in it.
+
+25-10-24
+
+	+ Slime trail on certain window tiles
+	+ Segfault when compiling in O2.
+	+ Rework weapon animation to ensure full animation rather than skips when 2 levelFrames are drawn per cycle.
+
+	== COMMENT ==
+	I think another window's id and thus texture is being loaded wrongly as a window hit on an edge-case.
+	Bug in window projection function.
+	So O0 obscures the bug and doesn't trigger the slime trails.
+	So under O0, ray isn't considered to have a window (as intended). Under O1, ray is considered to have a window.
+	The slime trails have the exact same distance as the last window read.
+	They're testing the exact same point.
+	No assignment of our slime trail is occurring in raycast.c. Must be an addition down the pipeline.
+	This is another very difficult bug to fix.
+	Full window pipeline has to be elaborated to fix this bug. lignering window hit or something in wall_window
+
+26-10-24
+
+	* castAllRays moved to the render function (was being called each update!!) (BIG IMPROVEMENT)
+	* streamlined redundant data resets for castRay
+	+ clev cheats
+	+ output to .log setting
+	+ After invuln wears off, bg needs to be redrawn (stays white (50% of the time?))
+	+ no decals for door shooting
+
+	== COMMENT ==
+	Wondering why castAllRays is  happening multiple times per frame? (It should, as a renderer, logically only happen once per frame?)
+	Bug fixed. Out of bounds access in processWindowHits().
+
+28-10-24
+	* pbitem cheats
+	* Debug enemy map info text should scale to zoom
+	- uncap FPS? (True FPS now shown as 2nd number in perf counter)
+	+ EDITOR: Improve responsiveness on large levels.
+	* Player can shoot enemy behind door.
+	* Slight off position for weapon draw.
+
+29-10-24
+	* pbclev forces pistol starts.
+	* Disable pushwall activation from the direction that they'd naturally move toward.
+	+Logging - memory allocation
+	+Logging - printing to .log file
+	+Logging - graceful failure
+	Memory manager
+		+ wrappers for calloc
+					 malloc
+					 realloc
+		+ memory counter
+		+ performance_counter integration
+		+ allocate fails to log and fall through to quit.
+		- Reroute all memory calls to memory.c (most mapped, not all)
+
+30-10-24
+
+	== COMMENT == 
+	new memory manager will eliminate a lot of code bloat if executed correctly, although I am worried about access times traversing the memoryBlock_t array.
+	Other benefits:
+		- Exact knowledge of memory footprint for game.
+		- Possible breakdown of what's usign the most memory.
+		- The end(hopefully) of memory leaks.
+		- Takes my program's seriousness to the next level.
+		- Lays very convenient groundwork for debug on low resource systems to see the true requirements of the game.
+
+31-10-24
+	+ E1M0 is E1M1 of Wolfenstein 3D.
+	+ Debug function trigger mem_Realloc problems.
+	- mapState = 0 sees no graphics at intro loop
+	+ Update message strings
+	+ Menu still off-center when coming out of Story so Far from menu screen
+	+ Tweak enemy damage at lower difficulties
+	* Heap corruption in 320x200 - Limit detail change below medium. 
+		* 426x240 - corruption in ultra low.
+		* 640x360 - Corruption in low.
+	+ Kill counter off in low resolutions, horizontally - check spacing
+	+ If player makes high score table at the bottom, 11th slot also shows.
+	+ Sound effects for invinci/invisibility
+	* Basic spritesheets for the 2 bosses - Police inspector and Yakov Yurovsky
+
+	=== COMMENT ===
+	I think we are playing with fire allowing buffers so low that they exceed TEXTURE_WIDTH.
+	Set limits to buffer sizes to ensure basic arithmetic doesn't go out of bounds.
+	Buffer drawing (at least) for these decals, in low resolutions, are accessing out of bounds.
+	Almost definitely an out of bounds access for the decal buffer construction.
+	Confirmed - in the decal creation functions. Out of bounds because of RENDER_PIXEL_COUNT
+	 being lower than TEXTURE_WIDTH * TEXTURE_HEIGHT
+	Bug fixed.
+
+
+1-11-24
+	+ You can shoot the dog through a wall in E1M1 (Shoot inside the cage).
+	* floorf -> (int)
+
+	== COMMENT ==
+	Function trigger memory bug is due to this line:	
+		    functionTriggerCount--;
+   			functionTriggers = mem_Realloc(functionTriggers, sizeof(functionTrigger_t) * functionTriggerCount, MEMORY_FUNCTION_TRIGGERS, 1);
+	When the last trigger is finished, the trigger array is actualyl freed due to realloc quirk (realloc(ptr, 0) = free)
+	Bugfixed.
+
+2-11-24
+	* Police spritesheet
+	- intelligent sprite search. (minor performance increase, only on very dense levels)
+	* Grin during invuln should take it back to invuln after.
+	- Police sound effects and attack pattern (not enough time.)
+
+4-11-24
+
+	* Sprites sorted by type.
+	* Indexes into type allows skipping irrelevant sprites.
+
+	== COMMENT ==
+	After mulling the whole sprites issue around in my head, I've decided to do this:
+		- All sprites get sorted at level Load.
+			- Blocking decorations first, then non blocking second, then enemies, finally items.
+		- We store the count positions of the last of these sprites.
+		- Now we can skip amny static elements of the array when checking for different parts of the array.
+		For example, enemise never need to check items as that will never effect them.
+		Movement code needn't check anything other than blocking sprites and enemies.
+
+		Next enhancement will be the sprites found in cells.
+
+5-11-24
+	+ Doors open during a save and load don't close.
+	* Intermission screen now draws correctly.
+	Level end screen:
+		- + Flags don't draw properly according to the end of level.
+		- + Red square not aligned properly to level.
+		- + Ticker ticks too slow.
+		- + Ticker needs a replacement sound.
+		- + Tickers stop before the correct percentage is reached.
+		- + Royal treasure doesn't light up properly.
+		- + Interrupts with keyboard should be more responsive.
+		- + New sound effect for new level load.
+		- + Menu should pause level end screen's tickers.
+		- + Menu destroys the level end.
+		- * play holy relic sound effect when relic revealed.
+		- + Spazzy sound effect for some reason.
+		- * Treasure count bugged on save loads. - Due to freeSprites() resetting from load.
+	Segfault in load screen: (guard against null introduced in function).
+			Thread 1 received signal SIGSEGV, Segmentation fault.
+		0x00007ff73977170b in drawFromBuffer (srcBuffer=srcBuffer@entry=0x0, destBuffer=destBuffer@entry=BUFFER_UI,
+			originalWidth=originalWidth@entry=160, originalHeight=originalHeight@entry=90, newWidth=newWidth@entry=160, newHeight=90,
+			startX=startX@entry=139, startY=startY@entry=272) at src/graphics_draw.c:473
+		473                 const color_t texel = srcBuffer[srcYByOriginalWidth + srcX];
+
+6-11-24
+	+ The level end code is a bit of an unworkable mess - We'll refactor today:
+	+ Loaded games don't load doors (all doors appear open).
+	+ Load game doesn't reset end level screen.
+
+7-11-24
+	* Weird graphics glitch in loaded games (see E1M1 save)
+	* Problem picking up treasure in a saved game (Item number not found) PROVISIONAL FIX - fallback to whole sprite array search.
+	* Memory manager for secrets
+	- Catch unroutable allocation in MEMORY_MISC as a number
+	* End level timer counter can still bug out.
+	Fix dead dog sprite
+	+ end level 3 acts like level 2? (Red box flash at wrong positon etc?)
+	+ 0% treasure tallies refuses to progress to next screen (Not sure here..)
+	* Starting a new game doesn't wipe your royal treasure status.
+
+	== COMMENT == 
+	So when a saved game is loaded, we are simply replacing the arrays (which have been assigned by the memory manager and placed into reference blocks) with the arrays from the saved file.
+	THe problem is, the memory manager is not informed of this reallocation, as it is simply:
+		doors = savedDoors.
+	So, the question is, what should we do in cases where we need to replace the entire memory block? Loop through the 
+	Fixed bug.
+
+	Problem: When a saved game is loaded, a truncated version of the sprites array is loaded (including the last part, which is pickup items.)
+	Bug - Sprites are not being calculated correctly.
+
+8-11-24
+	- Flag positions should be calculated via the relative position of the pixel in the map .png (if the dimensions of the window are kept to my specs, this isn't necessary)
+	+ Intermission text function moved to graphics_draw so it can be used by many cutscenes.
+
+10-11-24
+	- Doors should only block from enemies (not badly placed sprites) (Just place sprites well, check for doors that don't close, inBlockingSprites check start at enemies)
+
+	* segfault looking into automat secret in police offices: (Never could replicate this, marking fixed)
+		Verified - engine bug
+	Thread 1 received signal SIGSEGV, Segmentation fault.
+	0x00007ff793feb8dc in windowProjectionDrawRoutine (windowId=60) at src/wall_window.c:80
+	80                  if (windowId != ray->windowHits[i].windowId)
+	(gdb) bt
+	#0  0x00007ff793feb8dc in windowProjectionDrawRoutine (windowId=60) at src/wall_window.c:80
+	#1  renderWindowProjection () at src/wall_window.c:43
+	#2  0x0000000000000000 in ?? ()
+	(gdb)
+
+	+ Police walk speed does not increase on aggro.
+	+ Add police boss into game.
+
+11-11-24
+	* E1M5 rough sketch complete.
+	* Implement all police boss logic.
+		* Item drop logic.
+		* Movement logic.
+		* animation cycle logic.
+		* attack logic.
+	* Implement intermission 1 & 2.
+	+ E1M6 start with knife and 50% hp (nightmare knife + 25%hp), no ammo.
+	+ some mids still reload before looping properly? (E1M5 music, investigate)
+	* Players with zero ammo picking up avtomat should auto switch to avtomat & same for lewis
+	+ After new life if in mid fire, fire animation still goes off
+	* Map placements E1M5:
+		+Medkit in courtyard.
+		+Health in the toilets.
+		+more ammo in the stables.
+
+12-11-24
+	+ E1M6 draft.	
+	* A collected royal treasure on a level reset removes that treasure.
+	Sprites behind pushwalls still visible on minimap (getVisibleCells??)
+	Sprites being culled incorrectly in some angle combinations
+
+13-11-24
+	+ Invuln redraw BUFFER_BG still bugged.
+	+ Message when picking up a avtomat from 0 ammo still implies you have acquired it.
+	+ picking up weapons shouldn't grin after initial pickup.
+	* Percentage counters in end level screen should be shifted to the right unless at 100%.
+	* Police will continue to fire even with no LoS
+
+14-11-24
+	+ E1M7 start
+	+ MIDI creation start
+	+ Packaging textures, levels, sfx, midi into .b3d files (when all texture spots and sfx etc are finalised)
+	- Draggable windows
+	+ Sprite projection is not accurate - see E1M7 intro
+
+15-11-24
+	* Fix the new bug introduced for sprite culling along X Axis
+	+ When firing z fighting happens with lights placed over other objects
+	- 1 pixel culling of top of sprite at medium range (not serious/visible enough to bother investigating)
+	* Reduce health of guards.
+
+	== COMMENT == 
+	Issues were introduced using tanf to project the sprite.
+	changing to  linear mapping has fixed the bug.
+
+	Composing begins today.
+		Some interesting instruments for Bolsheviktion	
+			33 - Fingered bass
+			45 - Pizzicato
+			14 - Tubular Bells
+
+16-11-24
+	* E1M7 draft
+	+ Tighten up door drawing for smoother animation
+	+ Menu sound effect replacement
+
+17-11-24
+	* E1M1 music draft
+	+ E1M8 draft
+	+ Implement basic boss mechanics
+		+ 15 seconds temporary invisibility
+		+ Sound recordings for boss
+
+	+ Improve invisibility effect
+	+ handle lower resolution buffer read access
+	+ Toilet flushes randomly sometimes, nowhere near a toilet. (under investigation)
+	* Police should have only a 50% chance to stagger.
+	+ Don't put an extra life in plain sight on train level.
+	+ Take invisibility cloak away from boss room / only put it on easier difficulties.
+	* Royal Treasure offers much less points.
+	+ Half the available medkits on higher difficulties in train gangways.
+	+ Police pain state should be holding a gun
+	* Decals don't show when shooting enemy behind doors.
+	+ SHooting accuracy tolerance should be improved.
+	* Update and enhance random number generator.
+	* Update Lewis gun pickup sound.
+	- Can't load midi file handle error
+	- What happens when no sprites in level? (make sure there's at least 1 sprite)
+
+	== COMMENT == 
+	See comment for 27/11 for phantom toilet flushing
+
+18-11-24
+
+	* Sound effects for Yurov
+	* More boss mechanics - at certain levels of hp he whines in pain and drops items
+	+ Final cutscene sequence intialisation after end level screen for E1M8 and "The End"
+
+19-11-24
+
+	* Final cutscene graphics first pass
+	* Custom function for transparent boss so as not to impact regular sprite draw performance.
+	+ stop spamming end level switch
+
+20-11-24
+	
+	+ Finish final cutscene logic
+	* include pbitem7 for relic aquisition
+	* Triggers for INTERMISSION_3
+
+21-11-24
+
+	* Complete game loop established!
+	* Boss should drop gold and silver keys (replacing orlov sceptre)
+	* End level screen blocks can't be spammed.
+	+ Finish rough edges final intermission
+	+ Start work menu fine-tuning
+	- Fade out music at the change to going back to main demo loop
+	- Functionality added - Fade out (Disabled)
+	+ Preload Hardcoded engine midis into memory for easy loading.
+
+22-11-24
+
+	* Finish draft E1M8
+	+ Draft E1M9 (secret level)
+	+ Lower render resolutions don't sample correctly for invisibility
+	+ Timer counter in end level can still break
+	* Sound positioning directions fixed
+	* Bullets can travel beyond doors and pushwalls.
+	* Story so far click throughs don't act in the same way as keyboard space presses
+	* Mouse movements in Menu shouldn't spam option select noise
+	- SFX when played and player moves from original source, sfx need updating directionally
+	* Hitting escape during end level tickers opens map, then takes user back to level
+	* Escape permanently pauses intermission
+
+	== COMMENT ==
+	Preloaded game midis sees a marginal increase in game cohesion.
+
+	Menu problem -> GAMESTATE_END_LEVEL -> GAMESTATE_MENU -> GAMESTATE_RUN
+
+23-11-24
+	
+	* Menu inaccessible during dying.
+	* pbclev change to level 6 gives gun and 7 bullets.
+	* Black dots where there are transparent window textures
+	- Editor: Background copy the lower color of the level
+	* Editor: Holding down Shift Selects blocking automatically
+								 Vertical Alignment of window
+
+	== COMMENT ==
+	Black dots are at the end of the buffer.
+	LOL black dots were actually on the texture
+
+24-11-24
+	
+	* Weapon ammo check fixed.
+	* boss dmg and drops tweak 
+
+25-11-24
+	
+	* Weapon feel and animation improved.
+	+ Avtomat and lewis sound effect needs beefing up
+	Bolsheviktor modifiers:
+		* 50% setup time for fire
+		E1M1
+			+ another helath pack in wood room
+	+ New game interrupting old game confirm dialog
+	+ Fade from E1M9 -> new game
+	+ segfault in game over
+	+ Continuing to fire after an enemy falls continues to produce blood decal for a time.
+	more than sav_09 doesn't show
+	+ Save file on game load shows medium difficulty, but loading it and checking it shows it as BOLSHEVIKTOR
+	+ Map fixing and general polishing
+	+ Y and N for exit in other contexts
+
+26-11-24
+
+	* Dying enemies don't trigger ENEMYSTATE_PAIN
+	End level screen disallows next level continuing (sometimes - what are conditions??)
+	* End level up-down keys in menu still make sounds
+	* Flags and squares for map screen
+	+ end level menu music doesn't loop correctly.
+	+ Menu sounds - military?
+	* Decals shorter duration
+	+ Decals being generated through windows? -- Check fix for decal visibility implemented earlier
+	* Entering E1M9 triggers end intermission
+	+ Intermission enter key not working.
+	+ Recheck knife attack range (see E1M6 intro)
+
+	== COMMENT ==
+	Z fighting seems to happen on more than merely firing - certain other conditions trigger it too - we need a more robust system for cases where sprites are stacking.
+	Bug fixed - Reordered sprite draw orders and as a rule forced lower spriteIds to always be drawn first.
+
+27-11-24
+
+	* End level switch can't be pressed 2nd time
+	+ Intermission music doesn't play
+	* Refactored all menu input commands into input_fns_menu.c
+	* E1M9 draft complete.
+	+ 2 more Wolf3D textures to replace.
+	Some ambush modes don't work?
+	+ BUFFER_3D drawing in all black on sometimes menu screen
+	* Screenshot ratios in load and save game fixed.
+	+ Loading new Bolsheviktor game from already started game does not fade out/fade in properly.
+
+	== COMMENT == 
+	Phantom toilet flush seems to be an unclipped ray cast check
+	They were due to a double bug - one I was double calculating buffer fo rthe function, extending reach way further
+	I was also using simple loop calculations to clamp the range of activate, which changes depending on the angle.
+	So now we get the abs of the x and y deltas between the calculation check and player, and the first one to hit half tile size stops the check (32 map units)
+
+28-11-24
+
+	* Saves are now ordered newest first.
+	* Disable menu access during RENDERSTATE transitions
+	- Segfault at demo end propagate sound
+	F10 quit - instant quit on demo record.
+	+ Program arguments reworking
+		$ gdb --args raycast-debug.exe demo_E1M4.dmo p
+
+29-11-24
+
+	+ Menus don't work in demo playback (--playback parameter)
+	F10 doesn't work in demo playback (--playback parameter)	
+	Magic header for demo files
+	- It should actually be frame 3 of firing weapon that enemies get hit, as that's when the bullet technically travels
+	+ Demo recording is NOT capturing all events faithfully.
+	* New setting - position for starting window
+	+ Add primitive logging into the game.
+	- Investigate TinyPNG feasibility - Tiny strips some necessary data for uPNG out.
+	+ Directory cleanup in anticipation of 0.9 BETA
+	- Directory separation of source files (future projects perhaps)
+
+	== COMMENT ==
+	Program arguments are now much more robust and clearer. 
+	File existence and type checks before loading any command line file into program.
+	Very unhappy with spaghetti code for demo playback.
+	keyStateFire seems to be starting at the correc ttime 
+	Bug - Weapon fires are not deterministic from record to playback
+		KeyStateFire is NOT on in recording, but ON in playback.
+		So, what determines how keyStateFire is on?
+
+30-11-24
+
+	- Enemies exactly on the other side of the door may make it hard to open (see E1M4 room with invis)
+	+ Determinate demos
+	* Can't escape out of a main menu demo running (try going in and out of menus etc.)
+	* Demos loaded from normal main menu don't disable mouse cursor.
+	+ Game over music won't play.
+	* HUD visible during game over.
+	* Pressing escape during game over resets DYING_2 
+	+ Hi-Scores continually writes to file
+
+	== COMMENT == 
+	After many more hours of debugging, I have somewhat improved the demo accuracy.
+	After some more hours, I found a potential non-deterministic bug, and I also coupled shots to levelframes.
+	Now we seem to have demo consistency!
+	Not all the time it seems however... very disappointing
+
+1-12-24
+	BETA 1 day
+	+ At final end intermission screen, stretched image isn't scaled correctly.
+	+ Can't escape out of main menu on BOLSHEVIKTION 3D splash
+	+ Set Par Times for all levels
+	* Wolf3D level 0
+	* Map default in settings.cfg
+	* Entry parameters for --level and --record extended to provide difficulty
+	
+2-12-24
+	* X button doesn't kill game
+	* Activate is very wonky and unreliable.
+	- Precompute player angles once per tick using rayAngle_t struct
+	* if mapStart == 2, black screenwipe on first startup
+ 	+ Hi scores shouldn't write unless actually cracked top10.
+	clev changes introduce black buffer again
+	+ New game from end level does not reset the end level exit switch spam
+	- E1M4 timer should stop at intermission
+	* Intermission music E1M4 doesn't go off.
+	+ Disable input during the gameover
+	+ Increase ammo of Elite guard
+	+ Police sometimes only drop one clip
+	* Police should have a 50% chance of dropping dogfood
+	+ Invisibility should evade aggro, however if aggro, should simply reduce accuracy
+	* Final boss does no damage?
+
+3-12-24
+
+	+ Overlapping trees causing a segfault? - Confirmed negative index access bug
+
+4-12-24
+	* beefier Lewis sound effect
+	- New sound effect for ENEMY_ELITE shots
+
+5-12-24
+	+ E1M9 completion does not trigger tricolor flag on finish
+	Invisibility:
+		* 20 seconds only
+		* Evade aggro, reduce accuracy if already aggroed
+		+ Make effect more prominent
+		+ Fix buffer access in low render detail
+			
+	+ Holding cells red square should be defined, should player go into it from E1M0
+	+ Some enemies don't switch from ambush after aggro (See E1M4)
+
+	== COMMENT ==
+	The backup buffer is used because for some reason the 3D Buffer is full TRANSPARENT_COLOR.
+	Bug fixed - we were using a default calculation to get the correct values, but at different render qualities the number needed to be updated.
+
+6-12-24
+	* Hook up secret level boolean for proper flag drawing. (this will also need to be saved.)
+
+7-12-24
+	Loading corrupt saves shouldnt' crash program.
+	* Bonus for beating par time working
+
+8-12-14
+	LINUX:
+		* Buffer overflow on level change.
+		* Buffer overflows on level complete.
+		* Buffer overflows in save game menu
+		Level End treasure portraits not aligned correctly.
+		Buffer writing problems in audio module - What triggers? -- Race conditions with pulseaudio
+		+ Music on 2nd repeat drops certain notes
+		Malloc crash in renderColorBuffers?
+			#19 0x000055555556d95d in renderColorBuffers () at src/graphics.c:406
+			#20 0x000055555557930d in main_render () at src/main_render.c:138
+			#21 0x000055555555d592 in main (argc=<optimised out>, argv=<optimised out>)
+				at src/main.c:149
+				malloc(): mismatching next->prev_size (unsorted)
+			Thread 1 "bn3d-debug" received signal SIGABRT, Aborted.
+			__pthread_kill_implementation (no_tid=0, signo=6, threadid=140737327904832) at ./nptl/pthread_kill.c:44
+			44	./nptl/pthread_kill.c: No such file or directory.
+			(gdb) bt
+			#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=140737327904832)
+				at ./nptl/pthread_kill.c:44
+			#1  __pthread_kill_internal (signo=6, threadid=140737327904832)
+				at ./nptl/pthread_kill.c:78
+			#2  __GI___pthread_kill (threadid=140737327904832, signo=signo@entry=6)
+				at ./nptl/pthread_kill.c:89
+			#3  0x00007ffff79c7476 in __GI_raise (sig=sig@entry=6)
+				at ../sysdeps/posix/raise.c:26
+			#4  0x00007ffff79ad7f3 in __GI_abort () at ./stdlib/abort.c:79
+			#5  0x00007ffff7a0e676 in __libc_message
+				(action=action@entry=do_abort, fmt=fmt@entry=0x7ffff7b60b77 "%s\n")
+				at ../sysdeps/posix/libc_fatal.c:155
+			#6  0x00007ffff7a25cfc in malloc_printerr
+				(str=str@entry=0x7ffff7b63c10 "malloc(): mismatching next->prev_size (unsorted)") at ./malloc/malloc.c:5664
+			#7  0x00007ffff7a2937c in _int_malloc
+				(av=av@entry=0x7ffff7b9fc80 <main_arena>, bytes=bytes@entry=632)
+				at ./malloc/malloc.c:4007
+			#8  0x00007ffff7a2b5f9 in __libc_calloc
+	
+	+ Extra life at 100,000 points
+	+ Increase points death penalty (to 50,000)
+	* Advance program number
+	- Black pop in when loading levels
+	* Mountain Outpost flag says complete when entering the level
+	* Border crossing square needs to be aligned a bit better
+	* Ipatiev house should be a bit thicker
+	* All existing cheats disable upon new Bolsheviktor game
+	* Menu SFX
+	* E1M9 dog pen has a window bug
+	* E1M9 can't pick up royal treasure
+	+ E1M2 extend silver key a bit, change routing for level - too linear
+	* Clear up pointer not found errors upon exit.
+	+ Quicksave/quickload not working
+	* Player can still shoot when render is black
+
+	== COMMENT ==
+	Happily, after 5 months away from Linux development, coming back I got the game working within 10 minutes.
+
+9-12-24
+	+ Demo reset must reset all invis/invuln flags.
+	+ Move thread memory out of manager to avoid race conditions and mutex issues.
+	+ seenMap not being correctly freed
+	+ Initial opening of menu in GAMESTATE_INTRO doesn't produce sound effect
+	+ Time in end of level E1M4 illustrates bug.
+	Movement:
+		+ Clipping on walls behind player when movement is forward -- To investigate more..
+		* Wallrunning through closed doors (E1M1 silver key)
+
+	== COMMENT ==
+	Black fade is not looking great because we are stopping the static hud drawing while transitioning.
+	Movement:
+		problem: In strafe, player can be facing the NEXT tile, and glide through a door.
+		Adding new door checks fixes this bug.
+
+10-12-24
+	* Train station level tweak
+	* Logging
+	* Add verbose logging setting
+	+ End level timer -- I can't reproduce this properly!
+	+ Black screen in new game from normal startup -- Deeper issue at play here.
+	* Invuln face timer tick not paused on level pause.
+	+ Route all printf errors to the logger (Ongoing)
+	* Hi scores should only save when needed.
+	+ Warning for new game if starting new game from already running game (Implemented, but check to see if works in all situations)
+	* Difficulty not being added into demos.
+	* Add difficulty to the map screen and prettify
+	- Hi scores, if an identical high score is achieved, should continue to write to the table.
+	* Previously held weapon is not loaded from save.
+	+ In some conditions, an enemy can walk through a wall. (See E1M1 save).
+
+	== COMMENT ==
+	This function trigger bug was potentially a very hard-to-detect problem - That the timer would increase even if the levelFrames were not increasing.
+
+11-12-24
+
+	+ Midi creation E1M1.mid + E1M2.mid start
+	+ Invuln in E1M9 is blocking
+	+ Final pass 1 of maps - 
+	+ bundle maps together and read maps from file
+	* Mouse stops working on menus during demo playback
+	+ Tiny space between HUD and bottom of screen. (calculate)
+	* Release hides console (but enabled via settings.cfg)
+	+ Blue changing parameters disabled if not compatible in cmd
+	* Key unlock sound effect for doors
+	* Picked up a an russian... message
+	Failed loads and saves show properly, but should not be choosable to open
+	* Random death sound if yes is pressed for quitting game
+
+12-12-24
+
+	* Choosing Yes for exit with keys should switch the modal button to yes as well.
+	* Intro midi done.
+	* Arrows in save/load disproproptionate in scale.
+
+13-12-24
+
+	* Expand out printError so as to take many arguments so we don't need to print to string buffers.
+	+ Demo fire frames are all single shot even when auto is enabled.
+	* Intro loop should align with music.
+	+ New game from started new game needs to be tweaked and perfected.
+	* First shot after new game bug persists for demos.
+	* Add version information to intro card and registration information.
+		Be sure to validate all upper case for registration information.
+	* Cheats only for registered
+	* Custom level loaders, demo record/playback only for registered
+	+ Registered log info
+	* settings.cfg level of verbosity for metrics
+	* custom name in HISCORES for registered players
+
+	Map Debug for registered players - + Entity info (Shift tab enables these)
+									   + pathing
+									   + snd propagation
+									   + map boxes
+	+ Cheat Unlimited ammo (99 ammo and ammo doesn't decrease)
+	+ Hidden rooms for no clipping
+	* Framerate info enabled/disabled via f1 (granularity included)
+
+	== COMMENT == 
+	Registered mode provides the following benefits
+		Custom Demo recording and playback
+		Custom level loading through parameters
+		Cheats enabled
+		Custom name in HISCORES.b3d
+		"Thanks for playing, "name!" in wedding screen
+		Custom soundfont loading
+	
+14-12-24
+	
+	* Metrics in demos can be enabled
+	+ Mysterious desync on demos, try loading three demos in and watch after a few reloads
+
+15-12-24
+	Website Pre-planning - flask + deployment (find cheapo)
+	* Title on Window
+	+ Before release - 9 nice demos
+	+ some E1M5 lights are marked as blocking
+	* Put registration info bottom right of title card
+	- disable demo record for final release. (Not needed as underlying issues fixed)
+
+	== COMMENT ==
+	we don't want to effect the main game's gameplay.
+	I just can't justify any more time on these demo syncs, it's been months of banging head against the wall.
+	I have to just let that bug go into the final release. Demos won't be reliable.
+	I'll create a few different demos, see how they play back in the engine after the fact, choose some OK ones.
+	In that case, disable demo record in command line for final release.
+
+
+16-12-24
+	* Sndpropagation doesn't make aggro sounds to enemies.
+	* Player move refactor to make easier to debug.
+	* Player score ticks up in an animated fashion
+	+ Split and enhance audio features of main midi.
+
+
+	== COMMENT == 
+	Looks like a slide is occurring into sprites as well
+	Bug fixed - in the slide, there would a double buffer add that was propelling player through some obstacles.
+
+17-12-24
+
+	- Double yell on one of the death sound
+	F10 exits immediately even on non-demo
+	* Recalculation of score upon level change. (should reset)
+	Guard death 16 + 18 are identical, 17+19 too
+	- Right now, no way to access Bolsheviktor! E1M0.txt without commandline
+	* Trees near the Secret clubhouse in e1m9 are not blocking
+	pbclev cheat always enable for all modes.
+	* Map finalising png
+
+18-12-24
+	+ Game reset after death shouldn't recaclulate score climb
+	* E1M1 final mid done
+	* E1M2 map finalise	
+		* Lamp in wood room needs blcoking
+		* Sacks need blocking
+		* Maze needs ambush
+		* one bunker needs doortracks
+		* Update par
+	* Fix up any logic errors in point assignment and bonus assignment
+	+ enemy->seesPlayer true even if LoS.
+	* A lot of enemy code has been refactored, modularised.
+	- Windows are drawn after enemy map info.
+
+19-12-24
+
+	- Player pain grunt
+	Level 3
+		* Silver key on level 3
+		* Flag in next room after key needs blocking
+		* Ammo in normal mode is too plentiful
+		* Put something in the secret pushwall to the main hallway?
+	+ Guard aggro should be tweaked
+	+ Pistol sprite
+
+	E1M4 - * green barrels do something (only cleared on hard/bolsheviktor)
+		* secret locked door show proper texture
+		*Fixed cursed hallway sprites
+
+	+ E1M5 - Sacks in jail
+	* Knife doesn't guarantee stagger
+	+ E1M6 - Connecting area from freeze carraige texture
+	* Above 9 lives affected by bonus from 100000 doesn't draw num to screen.
+	+ E1M7 - +Well in courtyard needs blocking
+			+ Add some more cruficied/burned people at start
+	+ E1M8 - make sure statues don't get blocked by chandeliers
+		Normal mode - Yurov needs to hit doublely as hard
+	* High score Writes ALL the same name to the high score file.
+	+ MEMORY_WINDOWS taking some time to free?
+	- E1M1 Dogs still aggro at some points (Sndprogagate?)
+	+ Refactor file to prepare for the .b3d archive read.
+
+20-12-24
+
+	Refactor mostly complete -
+		* Pushwalls not working
+		* Next level queue up
+		* reading from binary
+	
+21-12-24
+	+ All dev folders moved from directory
+	+ Custom packager .py
+	+ loading All assets from .b3d
+
+22-12-24
+	+ Disable saving from --level parameter - not having custom code to load up potential files that are not there.
+	+ Disable custom demo creation from custom maps - only can load up official maps.
+	* Modify custom level loading parameters - can now take numbers (official levels) and .txt files (custom)
+	+ Clear memory for the b3dFile_t
+	* Restructure midis, read from binary
+	* Textures, SFX, and Music #'s replaced with %
+	* Too much ammo on Bolsheviktor! E1M1
+	+ A door that has been jammed open should be uninteractable
+	* E1M1 - Move ammo away from barrel to make it easier to collect in Bolsheviktor
+
+23-12-24
+	+ Segfault in mouse motion while menu is quitting
+	+ Loading custom levels + midi file.
+	DLL Cutdown
+	* E1M2 midi
+	+ Toilet bug STILL there... (too rare to bother with fixing.) (Fixed finally - was ENUM space sharing - watch that!)
+	* Switching guns mid fire shows the fire frame for the new weapon
+	Start readme.txt
+	* Reset levels kills midi
+
+24-12-24
+	* state.c refactor
+	* Music from custom levels playing .mid
+	+ Record some demos
+	Watertight loading and saving
+	LICENCES.txt
+	+ registration generation and checking
+
+25-12-24
+
+	* Demo playback option quits the game after demo has run.
+	+ Demo, if dying on invuln, continues invuln in next demo.
+	WINDOWS 7
+		* Console set to true still closes window
+		* Cannot find saves and demo directory
+
+	+ Bug in enemy movement code can allow them to clip into walls.
+	* End level performance is slow. Color buffer to blame?
+		-	* New texture - empty portrait of tsar
+	+ Pillar in secret pushwall not blocking E1M2
+		+ Invuln tanks FPS on slower cpus? (inlined function) (using a LUT)
+	* Full screen doesn't actually full screen on lower resolutions
+	* Write logs to state when a program has exited successfully
+
+	== COMMENT ==
+	Trying to debug the Windows 7 build of the game - Finally got access to a debuger with w64devkit
+	Fixed, cut down too many dlls 
+
+26-12-24
+
+	* Full screen stretched doesn't draw flash properly 
+	* Loading save changes input state
+	* Loading saves doesn't load new game music.
+	+ Segfault in memory freeing.
+	+ Quickload doesn't recognise new loads after the first one is made.
+	+ Secret area at the beginning of E1M3 has non blocking things tha tshould be blocking.
+	* Invuln not only sticks on after demos, but also after death sometimes. Seems if the player picked it up at all during the previous run.
+	Remove fluidsynth debug log in main folder.
+	+ Remove Federov on all difficulties other than medium in E1M4 courtyard.
+	* ENemies still believe they can see player when they cannot.
+	* If in custom level load, midifile cannot be found, fallback
+	* Moderate improvement in the rendering of invuln.
+	* Choosing to quit game with mouse hangs game.
+	* New texture pass and new company logo
+	
+	== COMMENT ==
+	Windows XP support looks unlikely at this point. Newer versions of SDL2 don't provide support for it.
+	Perhaps a custom build with an XP toolchain - Not high priority.
+
+27-12-24
+
+	* Message on why saving is unavailable
+	* Move quit and save exclusion code to input_fns.c
+	* #include <windows.h> should be conditional with #ifdef
+	* CoreAudio added to macos fluidsynth initialisation
+	* MacOS build
+	+ newline eof gcc/clang requirement
+	+ Mouse offset in menu? (fullscreen?)
+	Go through each module, think of ways to break.
+	+ settings.cfg solid fallback
+	+ hiscore.b3d solid fallback
+
+	== COMMENT ==
+	After some annoying faffing with permissions and having to build binaries for hours, I have a working version of BN3D on Mac.
+	Runs amazing, speed is great! All I have to etst it on is a MacBook Air
+
+28-12-24
+	* Only loading from param and .b3d for demo files.
+	* Gamestate run in record demo -> pause -> return to game as GAMESTATE_PAUSE
+	* Do all .b3d files exist? File check upon startup
+	* Demo desync - First load and subsequent load.
+	* Smaller font for text in bolsheviktion splash
+	* Map zooming for demo Playback
+	if the palyer is ever in the way of a patrol and forces a turn around, that should aggro the guard.
+
+29-12-24
+	* Error messages come up if logger unavailable.
+	+ E1M4 music
+	* settings.cfg validation and integrity
+	* Save file validation
+	* if saving while score increasing, make sure to finalise the score and not save as incrementing.
+	* quicksaves should load properly now.
+	+ registration
+
+30-12-24
+	* Free username
+	* Advance program to 0.95 Preview
+	+ New game fade out from menu / no fade out from a game already started.
+	+ Load game from main menu no fade out
+	start going through some unusual button combos and load pathways.
+		1) LoadLevel -> gameover -> normal base game
+		2) loadLevel -> finish level -> normal base
+		3) new Game from demo record/demo playback disabled.
+	+ Spelling and grammar/wording 
+	+ Faberge egg misplaced pixel
+	+ Occasional Crash on non-gdb debug at demo clearing - To me, it looks like Fluidsynth doing something
+	+ bn3d logo should fade to black more obviously
+	+ Take over to Valgrind
+
+	== COMMENT ==
+	All features are now finalised!
+	Now for some cosmetic improvements, starting with fade in/fade out
+
+31-12-24
+	+ Crash confirmed All systems outside of debugger.
+	* Malloc issue in b3d on linux.
+	* Unused results for fread in file_savegame.C
+	* file_settings.c please eitehr fix or delete string seems to over run
+	* graphics_map.c 326 fix sprintf call
+	* Linux error box for error messages.
+
+	== COMMENT ==
+	After hours fiddling with clang to no avail, going to do the old fashioned way - debug via printf's.
+	The problem with this bug is it seems more and more unlikely to happen as I keep the game running - perhaps it was just memory corruption?
+
+1-1-25
+	+ No intro card for Mac, but it shows on repeat loopings.
+	* Few image enhancements.
+	* EnemyQuadrant bug fixed.
+	+ High scores still writes the same name many times. (Non debugger only)
+	+ Toilet in e1M5 should be blocking.
+	Encounter with the tsar's last word in his text goes off-screen on 2560x1440
+	* Corrupted main Logo
+	+ Hype vid
+
+	== COMMENT ==
+	After successfully gaining access to a crashdump, we are seeing a crash inside fluidsynth.
+	I just cannot get demo synchronisation, I'm giving up. Humiliating defeat. But I did find a desync cause inside the quadrant decision function which I fixed.
+	Some thoughts going forward - Early planning I could've integrated the entire engine tightly around determinism - the idea to have a playback for the demo loop was
+	a decision that came later, and looking back I should never have considered it, given the amount of time wasted on trying to make it work.
+	Additionally, I believe C++ would be better suited to functionality like this, keeping the code tightly together.
+
+2-1-25
+	* Consolidated sin/cos angle calculations.
+	+ Fix the high scores - Not happening in a debugger.
+	* Loading save from end level deosn't reset state bool
+	Download module for Website
+	* Bonus PAR score not 10000 but 15000
+
+	Buy module for Website
+		Crypto
+		Paypal
+		Stripe? -- Copy code from Private Language Teachers
+	* Save game name corruption in non-debugger - This is same bug from October
+	Hype video:
+		* - Music cut better
+		* - End burn out transition
+		* - BEtter font in JANUARY 2025
+	+ end of level, automatically finish countup.
+
+	== COMMENT == 
+	Save game bug was quite thorny, but ultimately came down to not reassigning a freed save game pool when creating a new one.
+
+3-1-25
+	* Post hype to socials
+	* Countup should cancel and all points set in stone at level end, demo end, death, saving
+	* Warning when user chooses unsupported screen resolutions.
+	* Updating high score table happens multiple times.
+	* Refactor high score drawing code in cutscene.c
+	+ Code check - Null termination
+	* String drawing functions optimised using c99 LUT tricks
+	* ANSI terminal compatibility checks to disable ugly terminal command strings where it's not supported.
+
+	== COMMENT ==
+	Code to check if a file has already been written was using the longer of a registered user, without truncation.
+
+4-1-25
+	- Dog pathfinding broken
+	+ Crash @ release build after new game from game over. (spam enter)
+	* Game over using old texture / Negant 1895 update
+	* segfault when selecting new gmae with mouse
+		* check for null	
+		* fix null call
+	* No response during no input and alt-tab out
+	* All menu items after game over should be reset??
+
+5-1-25
+	* E1M4.mid finish
+	* Ptr error from demo freeMemory - Active demo
+	* demo_t records direction nums as unsigned, causing movement issues in playback
+
+	== COMMENT == 
+	Like a fool, I just simply cannot accept defeat on deterministic demos.
+	So I made a special debug version of the program and, alongside the main demo file, output a version of the enemies array at each frame in the original playthrough.
+	Then on replay, compare those frames, enemy by enemy, frame by frame.
+	This is brilliant, and literally would've saved me a dozen hours had I just done this from teh start.
+
+		== Restructure ==
+		The key to accurate reproducability is all about taking out and injecting the states of the variables at the same places in which
+		they were originally taken out. So the new refactor follows this pattern, and uncouples the activation of keyState fire to the function of the firing weapon/.
+
+
+6-1-25
+	* Move action polled events.
+	* inject player movement data in proper position.
+	* Update midi.b3d with new E1M4.mid.
+	- recouple firing with a keystatefire to fix the issue with the firing animation in demos.
+	+ Rerecord all demos and repackage.
+	- Sentinel value on demo, -1 not end, 0 end death, 1 end no death
+	+ Better hide the hidden pikuma room
+
+	== COMMENT == 
+	VICTORY! Determinism has been achieved.
+
+7-1-25
+	+ Demo record mode disallows all new games, save games, load games
+	- Demos not needing to be loaded when mode set to demo record.
+	- Last ditch effort to synch fire visuals - Store all relevant timings into a struct - new struct for attack.c
+
+8-1-25
+	* Enemy->awake not initialised.
+	* Loading level from parameters doesn't account for difficulty
+	CHecking:
+		+ movement ok
+		- ammo mismatch??? (Acceptable)
+
+	* Able to fire knife on next frame after out of ammo
+
+	== COMMENT ==
+	Spoke too soon, had to go through my loop, document extensively, and rethink the capture order of the gamestates.
+
+
+9-1-25
+	* Weapons switching at 0 ammo in playback should sync.
+	* Demo will not overrun demo frames.
+	* Weapon frames now consistent among demo and playback.
+	+ Stress test all levels with demo record.
+	Outstanding issues: + Enemies clipping into walls.
+					     + Decal appears when shooting from the side of walls.
+	f10 still brings up dialog during record.
+	* new, save and load disabled for demo record.
+	* Determinism for demoplayback parameter, but not for normal in game demos.
+		* Frame 0 not rendering from the demo. (Loop function triggers must be called at start of function)
+		* Uninitialised rotateDraw value from file
+	* Determinism Achieved for both --p and 1st demo of demo loop
+	+ Missing determinism for 2nd, 3rd demo loops
+
+10-1-25
+	* Update all functions to atan2f
+	* Wipe the bullet hit struct in player on demo end reset
+	* HP change bug with police for determinism
+	* drop sprite logic updated and refactored.
+	* timeSinceLosCheck needs an update on getLevelFramesRand() to account for 0 frames.
+	* Table in first room E1M7 not blocking.
+	* Enemies occasionally clipping into walls
+	* Debug array is not getting reset from demo to demo.
+	+ Remember at release to deactivate all debug arrays. Keep code in game. (of #ifdef DEBUG it out);
+	+ String referencing bodies is too big.
+	+ End of Demo red fade out like he's dead?
+
+
+	== COMMENT ==
+	Walking through walls debug - this one is gonna need a lot of printf's to pin the culprit.
+	We know that there should be checks prohibiting walking into walls, mainly. getMapAt().
+		Plan:
+			1) get enemy who dies' enemy number.
+			2) print out the mapAt location of this enemy each frame.
+			3) pinpoint frame he walks through the wall.
+			4) 
+	Bug confirmed - buffer units to wall in edge cases was being applied when it shouldn't.
+	We're going to rewrite the way buffers are applied.
+	Bug (fixed) - keeping a sentinel error reporter if I detect enemies going into walls.
+
+13-01-25
+
+	+ Demo fade seamless
+	* Decals in wrong place
+	Eliminate all Fluidsynth unrecognised meta events
+	+ E1M6 music
+	* Fix death reset loop
+	+ E1M1 0x20 & Loop ugly in game
+	* "It will quit this game" even after death -> reset to intro loop
+
+	== COMMENT ==
+	We might be able to just filter it out on wall slice passes within the renderer.	
+	I've decided to implement a final LoS check for the decal at its souce - the creation in shootRay.
+
+14-01-25
+
+	* Advance game to 0.99
+	+ map open in demo should close on death
+	- Investigate potential memory leak on demo loop (no memory leak!)
+	- Critical error bug in SDL Custom Free (occasional)
+	+ Map E1M1 no clip run to the end, shows 00:07 when the output shows 00:10
+	+ oop vars += put into the for statement
+
+15-01-25
+	+ All music finalised.
+	+ MacOS icon
+	* New game transition from menu
+		* graphics_transition.c has issues
+
+16-01-25
+	+ E1M9 Music remix
+	- CLicking saves and loads
+
+17-01-25
+	+ Paypal
+	+ Asha logos video
+	+ Final stress test + packing installer
+	* saves folder missing, ptr wiping goes bananas?
+	+ Disable console by default
+	+ Fade from demos?
+	+ Half bonus on easy mode looks silly 
+	+ Train midi stutter loops
+
+18-01-25
+	* Starting new game from end level screen does not clear the end level secreen and reset it
+	- Segfault when loading a save game AS a demo is being loaded in? - Can't replicate
+	* Demo starting from the cutscene doesn't fade in
+	* Replace E1M0 music for copyright
+	* Thanks for playing message in console
+	* start from level -> die to end of game -> demo loop -> after first demo, game quits
+
+19-01-25
+	- Black buffer still resides for BUFFER_3D
+	* custom tick callback for fluidsynth not being called for midis loaded from memory
+	* Tsar image not fixed properly in end screen
+	- Stutter on Stardust loop
+	- Desync on demo: Finish game with cheats, back to main loop (No idea what happened here...)
+	Crash on linux after a long time with libFluidSynth
+	+ Desync on linux with shotFired (float precision issue)
+
+	== COMMENT ==
+	Long standing issue with regards to the end level timer I think has been fixed - issue was the way counting up was applied and FPS of the game.
+
+	RC1 - No crashes for all platforms stress tested over 60 minutes!!
+	Will independently go through a full playthrough of the game on all systems tonight, but I think the game is ready.
+
+
+20-01-25
+	Valgrind:
+		* get_terminal_width() fallbacks
+		* calloc to initialise color buffers to 0.
+		* pollDemoFile shouldn't continue on null ptr
+		* destroyAudio check for valid pointers before free
+		* unload soundfont
+		* Increase usleep time for linux to avoid segfault?
+
+	=== COMMENT ===
+	Tried to build a custom version of fluidsynth so I could debug the issue, but it was pretty much a dead end.
+
+21-01-25
+	Build website pathways for creating registration file for players who pay
+
+22-01-25
+	* Sped up angle conversion function
+	Pathway and email generation complete
+	Valgrind:
+		* reading invalid data in readLevel()
+		* reading invalid data in pollDemoFile()
+	* noPrintF and stripping unnecessary printf's.
+	* Centering menu
+	* Advance code to 1.0 release!
+	+ Save code corrupts the sprites array in some cases
+	+ Extend dog attack range
+	enemies can still move while in attack mode?
+
+23-01-25
+	* Tweak animation
+	* Make all enemies have an end fire frame before going back to chase mode (see enemy guard)
+	Better fade for loading games
+	- Grain sack and bone pile in TRAIN STATION should be blocking
+	Watertight saving and loading
+	* Rerecord demos
+	* grunts for being attacked
+	* process guard death 15
+	* Demo ending at end switch doesn't record properly
+
+24-01-25
+	* Y/N doesn't work for the are you sure prompts
+	Mac Malloc error
+	* E1M1 plant in first big hallway needs BLOCKING
+	Quick load loads the new save before fade out/in
+	* Change tab shift to something else
+	die fade out and in doesn't always work
+	* Ammo in hut on E1M9 is blocking 
+	* If scrolling to the bottom of load game, the option gun goes off the screen
+	* Treasure value and enemy kill value needs to be readjusted, as does end of level bonuses.
+		I'm on level 4 and I already have 725,000 score in BOLSHEVIKTOR!'
+		Level 7 960k
+		* Make death penalty harsher as you increase in mode
+	* Memory leak when loading load games menu
+	* Items in E1M5 silver key room need BLOCKING
+	* Edge sprite not seen case (Very old engine bug)
+	* Last carriage in GULAG EXPRESS has a table not blocking
+	* TRAIN midi can be extended near the end to be a bit more epic.
+	* Congratulations! Level # Complete
+	PTR not found from the following memory sources:
+		SDL_Custom_free x 2,
+		Sprite decal buffer clear
+		Render sprite precalculation
+	* Quicksaves going above 9 corrupts
+	* ScoreNum continues to increase, even though it doesn't show on screen. Has ramifications for dying etc.
+	E1M5 music 0x21 fluidsynth meta event
+	- Box Art?
+	* Burnt at stake E1M7 in mid island needs BLOCKING
+	* False reported corruption of seenMapNum when cheat has revealed the whole map.
+	* Update object names for treasure
+	+ SeenMap ptr hanging
+	* If a new game is started from a loaded game, program doesn't know that game has already started.
+	* HUD alignment
+	Upgrade hud drawing routine
+
+
+	== COMMENT ==
+	Did a full, uninterrupted playthrough of Bolsheviktor! mode on Mac - Very close for full release.
+
+25-01-25
+	+ Email sent to dev acct / Set up on phone to receive messages too
+	+ Finalise 1.0 and set up installer for PC and Mac
+
+26-01-25
+	Other crypto methods included in payment option
+
+27-01-25
+	* Rerecord E1M1
+	+ Demo desync protection
+	* If added to the high score list, flash? (Hiightlight)
+	- Decal buffer not being flushed from level to level??
+	- Can our hero look angrier as he gets more and more hurt?
+	* Hide hidden room better in E1M9
+	* Treasure in last screen needs to be reset
+	- Wood door texture get rid of black border?
+	* Seen map double free it seems
+	* In Save load, names of difficulties should be BOLSHEVIKTOR!
+	* Segfault when loading a game when a demo is loading.
+	* Reduce the elite guard's volume
+
+	== COMMENT ==
+	Did 3 full playthroughs in different difficulties successfully and picked up a few bugs along the way.
+	Provisional fix - making sure to update the memoryType when inside my mem_realloc function.
+	It's a very rare crash the segfault when laoding game, but the right timing can cause it to happen.
+
+28-01-25
+	Release date.
+
+1-2-25
+	* MacOS official app pathways added for dynamic directory usage.
+	Memory address concerns:
+		* Patrol.c not checking for ptr before freeing.
+		* Seenmap being freed by free() at the wrong place, so memory manager cannot free it
+
+2-2-25
+	*Add icon to .app
+	*change some description of where files we be checked
+	*sign app and notarise
+	*Build for MacOS and Linux APPImage
+
+27-2-25
+	+ Some menu bugs happen - see ivan email
+	+ pbcossack should also give the player 99 ammo
+	+ High graphics by default
+	+ Tweak volume settings by default
+	+ Player finishes game in God mode, and then resets - player cheats still enabled
+	+ Dead guard sprite in the items array should be replaced
+	+ Finishing a level with god mode enabled keeps it on until the game logic can turn it off again (usually next level)
+	+ Advance to version 1.1 for Mac and Steam Store release
+	* Many sprites updated to claim full copyright
+	* All music now custom for copyright
+	README.txt lists controls and how settings.cfg works
+	+ Update BN3D Splash
+
+28-2-25
+	+ Activate Steamworks account and go through initial process.
+
+1-3-25
+	+ Add Achievements
+	+ Add COntroller support
+	+ New game not working after game complete?
+
+2-3-25
+	+ Update copyright on the main title card.
+	+ Map controller using SDL_Controller api
+		+ movement
+		+ buttons
+		+ disconnect
+		+ connect mid game
+		+ clarify connection mode with gamepad
+	+ Right click is same as space bar
+	+ Right stick deadzone make part of settings.cfg
+
+3-3-25
+	+ Fill up the missing texture slots with wolf3d like Nazi textures
+
+5-3-25
+	* Game over image adjust stupidly long guns
+	+ Dog refinement
+	+ Implement Steamworks ach's
+	* Stop spazzing of the buttons on controllers
+	* Stop spazzing of menu selection
+	- Quit with controller == same issue as bug before (can't reproduce)
+	* Inside the doom 2 E1M1 Wolf secret, add my own secret with a texture with the PB logo on it.
+	* Tidy up difficulty pictures
+	* Decorate what's behind e1m8's final door - another texture perhaps?? (easter egg)
+	* Flesh out last part of E1M4
+	+ Get store preview ready and generate materials
+
+6-3-25
+	* Numpad keys on controller can't select pistol
+	+ Left stick down and hold for shift?
+
+7-3-25
+	+ Controller left stick move precision
+	+ Modify MOUSE LOOK to be controller as well
+	+ Black screen when starting NEW game after cheats used
+	+ Generate ach images
+	Bonus, time and par times slightly off alignment (in lower res modes only)
+
+10-3-25
+
+	== COMMENT ==
+	Unbelievably tangled web to get the game running with steam.	
+	Firstly, I had to create an OpenGL compatible layer so that the Steam API could hook into it. After much agony, this has been
+	achieved.
+	I have been battling a fatigue probably caused by the daunting nature of integrating this C++ api into my C program,
+	and the complexity required to do so. I wasn't expecting it.
+	Secondly, there is a segfault that's triggered inside the DLL of steam, throwing up an error that the internet doesn't seem
+	to have heard of.
+	Thirdly, the API documentation on Steamworks is wrong, and the only way I found this out was looking inside the headers.
+
+
+11-3-25
+
+	* Verify achievements (one time) work
+	+ Verify achievements (staggered) work
+	Verify achievements work with no internet connection after starting
+	Fix all OpenGL render differences to Software
+	+ Achievements shouldnt' be triggered from cheating
+
+	== COMMENT ==
+	Daylight finally, I should have achievements working by the end of today.
+
+12-3-25
+	+ Hook up achievements For all achievements
+	* Resolve dangling pointer warning in sound.c
+	+ get name from steam servers
+
+	== COMMENT ==
+	The achievement system in steam is fairly straightforward, but the API documentation is hardly helpful in explaining it easily.
+	You have binary achievements and incremental achievements. All incremental achievements need to be tied to a stat.
+	The stat can be incremented via API commands in game.
+
+13-3-25
+	+ Make sure demos can't trigger achievements
+	+ Steam overlay pauses the game.
+
+	== COMMENT ==
+	Encountered a type bug in steamworks for some reason, and the only fix was changing all my stat values to float
+	reading them in as FLOAT
+	but writing to them as INT32
+
+	God knows why, but it works whereas if I have them as int I get errors.
+
+	I have the code pathways established for my achievements now, but the backend of steam is not saving the data even though it seems as if it would.
+	
+14-3-25
+	* Implement alternative achievement handler
+	* Implement custom system messages for when achievements have been progressed.
+	* messages overlay getting cut off by end level screen
+
+	== COMMENT ==
+	Rewritten the logic to handle achievements. Doing away with steam stats as they seem bugged. Now handling achievement progress internally, saving
+	a file achievements.b3d and letting internal logic dictate when to unlock them.
+	This will be a bit more platform agnostic, and I can queue the message system with a custom message.
+	Then I ran into a name mangling mismatch while trying to incorporate the messaging system into the C++ code.
+
+15-3-25
+	* Let messages queue correctly.
+	* Switch to Bresenhams
+	+ No menu controller support.
+	+ Deadzone?
+	* Debug controls F1
+	+ Different levels of detail bork the projection (try changing resolution in game??)
+	+ When controller put down and back to keyboard, Walk speed should be reset.
+
+16-3-25
+	* Textures are back to front on some angles
+	* hh easter egg	
+	* Toilet bug fixed
+	* Max controller run speed must match keyboard run speed
+
+17-3-25
+	Weapon on lower resolutions ever so slightly abovethe UI.
+	OpenGL - timers are going too fast?
+	* Roman weapon switch for easter egg
+	+ Flash gone on non-steam (??)
+	+ Boot steps can still be heard when demo running and you flick the control stick down and up
+	* Subtle trigger bug in timer.c is causing triggers not to go off, but also potentially other issues.
+	- InvisMasked weapon is not visible during pause screen
+
+
+18-3-25
+	* Add secondary check for resource files (for dev purposes)
+	* Mac not generating settings.cfg (Check userfilepath - seems incomplete)
+	- Phantom controller commands from DualShock 3 (I think this was just an old controller acting up)
+	* Not hooking in to steam API on Mac.
+	+ Shift key on Mac not shifting to sprint after controller usage
+	* No Steam overlay - Achievement toaster
+	Start packaging process for steam
+	Verify achievements on both platforms
+	+ Achievement progress indicator shows despite no further progress made.
+	+ Heap crash after 1st boss killed - enemy_hurt.c:255
+	+ Royal flush achievement indicators
+
+	== COMMENT ==
+	MacOS testing today. Generally stable and plays well. CAnnot access steam overlay however.
+
+
+19-3-25
+	* no persistence of achievements from achievements.b3d (not saving)?
+	- disable ach's through command line parameters
+	* unlocked ach's take priority and write to achievements.b3d
+	* capturing capslock state?
+	Crash on connection to a projector (???)
+
+	== COMMENT ==
+	Felt confident enough to connect to a projector and show others and it crashed. Go figures...
+
+21-3-25
+	* Burst fire mechanic for the WEAPON_LEWIS
+	- Enemies still move while in attack mode
+	+ "Achievement progress - Half a million (1 of 9)"
+	* Fix up the no ammo weapon switching
+	- Change fire time 
+
+24-3-25
+	+ Build final Mac release for testing with Steam
+	settings.cfg not able to be written - Log user path to log and auto-write log and refer uset to it
+	+ when settings cannot be loaded, dodgy settings are loaded and renderer screwed up.
+
+	== COMMENT ==
+	Process is again painful. Since using the last .app as a template for the new update, it of course broke all of the crap I did to notarise and validate and runtime harden etc, causing permissions issues.
+
+25-3-25
+	* In Mac Steam, registration.b3d should be inside the app.
+	* Test flow of mac installation and running from Steam
+	Linux build onto steam + testing
+
+	== COMMENT ==
+	I hate this fucking steam process so much.
+
+28-3-25
+	* Build for Linux runs on steam.
+	== COMMENT ==
+	More pain with this horrific process, this time with missing dependencies. But finally, we have the game running from a build on all 3 Steam platforms that I have advertised as supporting.
+
+	This will mark the end of 1.10 testing and getting this game to steam. I will put here a few notes about the particular build process for each Version of the game.
+
+	WINDOWS
+
+	MacOS
+
+	Linux
+	2 versions: 
+		Steam = old school files in content directory of Steam's build folder. All dependencies must be bundled in the same directory, with a launch.sh that steam points to to ask that the computer searches for all dependencies in that folder.
+		Standalone = AppImage file, building from the Bolshevition3D.appDir
+
+		OTHER NOTES
+		Both build versions will have custom user data files in .local/share/Bolsheviktion 3d
+
+8-4-25
+	+ Menu can still break when savescumming (This potentially is fixed)
+	+ Thin sprites block unnaturally
+	+ Add some extra text to allow continuing for intermission/Story
+	- Fix blood on hand texture
+	- FPS cap increase
+	+ Mouse sensitivity too high, even on 1.
+	+ Royal treasure on minimap.
+	+ Linux/Steam deck music playback wonky.
+	+ Replace Render Mode in menu with a FOV slider.
+	+ Deprecate render mode.
+	- Par time after an intermission screen occasionally does not grant additional points.
+	+ Main menu glitching when looking at story and advancing it too quickly
+	+ Castle -> Palace
+
+	== COMMENT == 
+	Based on player feedback, I have decided to try and tinker with some of the engine constants (fps, fov namely).
+
+9-4-25
+	+ Replace bubble sort with qsort
+	+ Different languages (Russian)
+
+13-4-25
+	* Reworked string drawing functions, more streamlined and probably more efficient now, in addition to being able to handle multiple languages.
+
+	== COMMENT ==
+	Having multiple languages in game has proven to be far less straightforward than I had thought, do to encoding of languages and what that means.
+	But by tomorrow the implementation should be completed.
+
+14-4-25
+	+ Report of quick save corruption and then crashing the game. (I think I've fixed this)
+	+ Demos occasionally losing sync because it can't find a sprite in the array?
+	+ Yes/No positions in other languages on quit screen
+
+15-4-25
+	* Fix up Message char lookup tables and map to 2nd byte values
+	+ Fix up string char lookup tables and map
+	+ 5/5 languages implemented
+	* Implement comma in main script
+
+	== COMMENT == 
+	Matching the texture atlas for each language by hand is quite laborious and taking up all my programming time today to implement.
+	Very annoying.
+
+16-4-25
+	* Connect backend settings to check for language on start up and from settings.cfg.
+	+ Shorten strings to fit in menus
+	* Level completed string isn't centered properly.
+	Thread 1 "MainThrd" received signal SIGSEGV, Segmentation fault.
+	+ Level Names translated
+	+ shootRay_EnemyCondition (spriteNo=209, stepX=<optimized out>, stepY=<optimized out>, angle=<optimized out>, isKnife=<optimized out>)
+		at src/attack.c:327
+	327         if (enemyHit->state == ENEMYSTATE_DYING) // Dying enemies never trigger pain frame.
+	(gdb) level 3 demo
+
+	Letting demos run loads level 1 AND the main menu at the same time, killing ability to provide input.
+	+ Story so far doesn't load first click Sometimes
+
+
+	== COMMENT ==
+	Implementation for the 4 additional languages should be complete by today.
+	Several Things which elongated the implementation timeframe:
+		1) I had to create new texture atlases to accommodate the special characters for each language, and 3 of them for the main char set.
+		2) Modern editors encode these strings as UTF-8, in which special non ASCII characters are encoded with 2 bytes. I had to account for the two bytes
+		when trying to use the character to look up the atlas position.
+		3) Creating new static arrays that correspond with the texture atlas image for all languages.
+		4) Creating extra logic to account for the upside down question and exclamation mark.
+		5) Refactoring the existing code, removing the inline strings from 1.1 and moving them to a new module, accessed by enum index.
+		6) Translating all the strings into different languages and allowing them to be index-looked up.
+		7) Connecting the backend settings for language selection on startup.
+		8) Accounting for refreshing certain buffers due to the new textures from the language change.
+		9) Some strings, which were calibrated tightly for English and fitting correctly into their spaces, run long in the other language.
+		10) Considerations needed to be made for multi-language string situations (like a username in Russian)
+		11) Other languages, due to different string lengths, needed a slight offset to fit into certain UI elements.
+		12) Buffers originally were set up to precisely handle English. Other languages needed tweaking.
+
+17-4-25
+	* Fix the string screen width return function (not counting correctly)
+	+ Level names aren't displayed in new languages correctly.
+	+ FOV message strings busted
+	English Promotional Materials updated in Steam
+	After some demo runs/new games, you're barred from saving when making a new game.
+	+ Escape key spamming can overload the sound effect queue
+	+ no steam open puts in NULL string instead of STEAMPLAYER
+
+18-4-25
+	* Add russian roulette cheat
+	* resolve ENTER or SPACE for skipping inside story/intermission
+	* All binary dialog alignments fixed
+
+	== COMMENT ==
+	Almost certainly the bug with my quicksave implementation, and potentially the bug that caused a few others,
+	was my lazy way of implementing what kind of quicksave files to generate. It is generating too many files.
+
+20-4-25
+
+	* Fix save game time position for some languages
+	* Fix save/Load month string
+
+21-4-25
+
+	* Have all translations at least ready for review
+	* Fix up level names not displaying
+	+ Deep dive into movement for the last time.
+	+ Rumble implementation + menu option for toggle
+	+ New Achievement: Stockholmski Syndrome
+	* Story so far does finish too quickly.
+
+	== COMMENT ==
+	Interesting bug picked up by a streamer, not sure how it made it through - activate used in demos was advancing story so far.
+
+22-4-25
+	+ Fix for demo desyncs (Not a fix, but a way to avoid an out and out crash)
+	+ RUMBLE:
+		+ Define and refine rumble characteristics
+		* Define and setup settings passthrough and parsing
+		* Menu slider for Rumble intensities & translations
+		+ Test rumble feedback
+	* Mouse look should enable when controller detected.
+	- New menu description for mouse look
+
+	Test with 1.1 settings, achievements.b3d, highscore
+
+24-4-25
+	+ Russia strings accurate and resized
+	* rumble fully implemented
+	+ Delay when first picking up a item (or initalising messages?)
+	+ Player's movement forward vector doesn't take into account blocking sprites just outside of the angle
+		- This leads to a break in the object glide.
+
+	== COMMENT ==
+	The rumble system I have implemented is very elegant and allows the game to emulate some effects for the controller, like a fading
+	heartbeat upon death, or some of the sound effects when an item is acquired.
+
+25-4-25
+
+	+ Update the objects atlas and ENUM labels
+	+ Improve clipping by giving objects a custom "bounding box"
+	+ update all maps to reflect this new system
+	* Rumble condition is triggered automatically if you just walk forward at the beginning of a level
+	Update the AI disclosure.
+	Press A/ B to skip
+	* Cheat string in russian
+	E1M1:
+		- Reshuffle starting room
+		+ Center well
+		+ Make the lamp blocking in the director's room in E1M1
+	E1M3:
+		+ Move the cross into a location easily gettable.
+	- E1M6 - remove the crown behind the medal
+	* Russian strings with english characters return 0 instead of the English.
+
+26-4-25
+	- Dogs shouldn't be able to bite through windows.
+	* Test I am invincible achievement
+	* Russian string final verification by translator.
+
+27-4-25
+	* Update Russian strings for final release.
+
+28-4-25
+	* Get full build without steam integration.
+	* Send off pre-release patch for German verification.
+	* Knife on E1M6 is inconsistent - why?
+	* Gesundheit in HUD fix
+	+ New Achievements - Another migrant train station stabbing spritesheet
+	+ New Achievement - E1M4 no health pickup
+	* Enemies do not aggro on knife stabbing at times, although their hp goes down.
+	* Aggro for bosses need to be against aggro 50%
+	* Entrance to ipatiev house needs to be a lot easier to get into
+
+	== COMMENT ==
+	the pause has something to do with the flashing effect, not the item pickup.
+	Furthermore, it is an OpenGL specific implementation issue - it doesn't happen with SDL software.
+	Fixed by pre-warming the pipeline.
+
+	Knife bug is to do with the way shootRay is designed - inconsistent 50% because of the random call.
+	Fixed by reimagining the range check and squaring the distances.
+
+29-4-25
+	* Get Spanish strings for translation ready.
+	* Portugese same
+	* Check cheats used
+	* Fix LoS for map once and for all, really bugging me
+	+ Rerecord demos to be safe
+	+ Animated frames - Guards, Basement, blood on ground, 
+
+	== COMMENT ==
+	Walked through the visible cell code again, replaced an old DDA algo with Bresenhams for greater speed + accuracy.
+	ALso included a secret wall check to prevent secret items from being revealed prematurely.
+
+30-4-25
+	Remove the AppDir references when linux Steam version tries to find its files.
+	+ Confirmed - Bug on Linux with level 1 music - gets wonky and doesn't repeat correctly, killing some notes.
+	* U with amulat doesn't render.
+	* Crash at end of level 3 ( think this has been fixed)
+	+ Guards that stand still should have an exception for movement (so that they can still startle players behind walls)
+	+ Loaded saves can sometimes twirl towards freedom
+	+ Heavy glitching sound on startup with PulseAudio
+
+	== COMMENT ==
+	Switching to ALSA as the main audio provider for linux. Also found a bunch of phantom bend notes from the E1M1 midi that was
+	causing Fluidsynth to chuck a fit. ALso, seeking back to 0 seems to not be the preferred way to loop on linux, so I disable that.
+
+1-5-24
+	* Registration file doesn't load in on linux.
+	+ Pitch gets lowered (I think this has been fixed) 
+	* Volume of title music
+	- Players should have a way to get out of a stuck bounding box if they're not actively still going into it.
+
+2-5-24
+	New demo records for trailer
+	* "Action unavailable right now" when recording demo. UNable to quit game.
+	Demo using a controller doesn't register all inputs.
+
+3-5-25
+	* Finalise portuguese translation
+	* Finalise Spanish translation
+	+ Finalise German translation
+
+4-5-25
+	* In-game messages should display over the partially open map
+	* Fix sys messages "i"
+	- If you are killed as you press the exit button, there is no code paths for that.
+	* Rumble on some angles but not others
+
+	== COMMENT ==
+	There is a potential for some more speedups in rendering the color buffers,
+	but I don't think I'll implement them.
+
+5-5-25
+	* Many save files in the directoy cause game crash when loading.
+	* Player can still run if their movement was saved as moving int he game file (i.e. quicksave).
+	* Specify in readme where the save files are located.
+
+	== COMMENT ==
+	Thought I was done for release, but there are some critical flaws in teh saving system that need patching else the game crashes.
+	Ok save system is not perfect, but it is more robust, and it's fine enough for a project of this calibre.
+
+	Note: steam build command:
+	<REDACTED>
+	
+6-5-25
+	* Russian strings for some characters were drawn not with pure black.
+	* Fix buffer overflow for Russian strings
+	* Fix small graphics issues on weapons
+	
+	== COMMENT ==
+	Absolutely typical - another 11th hour bug, this time in Mac - And something far more pernicious.
+	Illegal instruction, something i've never seen before.
+	In addition, debugging on Mac has these very annoying quirks - about 50% of the time the program doesn't start, just hangs
+	And the whole window becomes unresponsive and needs to be closed, reopened, gdb reopened to try again.
+
+	Found a buffer overflow from leftover assumptions about English strings in menu_draw.c, explanation:
+
+	"Because overflowing a local buffer is undefined behavior, whether it crashes or not depends entirely on how 
+	the compiler lays out your stack frame and what lives adjacent to that buffer. On Linux or Windows builds,
+	 the extra bytes you wrote past your 14-byte difficultyBuffer might simply clobber some other unused padding 
+	 or non-critical local, so you never notice a bad jump or SIGILL. On macOS, the stack layout was different 
+	 enough that your overflow stomped on the saved frame pointer or return address (or a function pointer in 
+	 your glyph table), so it blew up immediately."
+
+7-5-25
+	Open Pelican Blue Software socials for Reddit, X, Instagram, Tiktok?
+	+ Rough cut of English version of new video
+
+	== COMMENT ==
+	1.2 patch deployed successfully, however sadly the libfluidsynth segfault is present in the critical Steam Deck Linux version.
+	So Over the next few days, I'll try to create a minimum workable representation and attempt to root the problem out, whether it be manipulation of the midis
+	by the program causing the buffer to run dry, or something else interally within the particular version of libfluidsynth for linux.
+
+
+8-5-25
+	* "B" in Portuguese (possibly others) has a stray off-colour magenta pixel.
+	+ Circle strafing is choppy
+	+ Loading a game while end level screen doesn't reset some parameters
+	+ sound segfault
+	* off-colour pixel on the lewis gun.
+	Get midis ready for sale
+	+ Do replacement of white with black for messages when in invuln mode.
+
+9-5-25
+	* Connect mail
+	* Upload all videos (5 langs) to youtube
+	* Upload all videos to steam
+	* Get 10 screenshots to replace old ones in 5 languages
+	* Add new announcement for patch 1.2
+	+ Spanish ! at the beginning and ? should be shortened
+	+ Nuevo guardada in save - change time position
+ 	+ Save not available when loading in level with -l parameter?
+	+ Dying blood fades could be a bit quicker... take forever - 2000 feels better imo.
+
+	== COMMENT ==
+	Could the fluidsynth bug not be related to fluidsynth at all, but a problem upstream (found a bug in the memory manager with Asan)
+	Yes, this is a race condition with fluid_synth_add_mem and the audio buffers retrieving samples (found with Tsan)
+
+10-5-25
+
+	+ Right click doesn't open doors reliably
+
+11-5-25
+
+	== COMMENT == 
+	The circlestrafe jitter bug is more complex than it looked at first - None of the usual suspect have fixed it, and I can't think of a reliable
+	way to quantify the jitter as it is a user perception thing.
+	At first I thought it was a discrepancy between the rotationAngle and the rendering angle, but that didn't fix it.
+	Then I thought it was a misplaced center render column in castAllRays() - that wasn't it either.
+
+	After a few more hours of debugging, I've gotten a smooth rotation with a jump, assuming that jump is from the build up of offset.
+
+12-5-25
+	- Statistics metrics (add line F1 to disable)
+	Alternate reality -> alternate history 
+	+ New life buffer needs to be tweaked -loading the old values in of prevX, prevY etc.
+	* Shouldn't be able to save on itnermission map 4 and 5.
+	+ Store player.x,player.y as prev on new level load, load game, next level load
+	- b to skip cancels the whole story so far on controller
+
+	== COMMENT == 
+	Real bastard of a problem - there's one small change now that needs to be made, I can feel it.
+	Fixed - after much debugging, a combination of simply averaging player X and Y across game ticks and forcing an update if a player is moving
+	smooths out the whole circlestrafing system.
+
+	Now that I think bout it, the random failues to load the game which happen occasionally that I've noticed for a while, are most likely race condition segfaults!
+	COntinue until all Tsan errors in Linux are gone!
+
+13-5-25
+
+	== COMMENT ==
+	Okay, several things have complicated the smooth rendering I thought I'd fixed yesterday.
+	1) To get non-stuttering updates, I need to be able to update the player every frame. But to update the player I need to trigger the update function/
+	But, triggering the update function once per moving frame speeds up gameplay, as the update is designed to only be triggered when the accumulator has
+	hit its threshold.
+	2) The foisting last frame's player.x and player.y starts breaknig some things that update player.x and player.y mid game loop:
+		a) We load in a new prevX, prevY at beginning of game loop, then mid game loop logic changes
+		or b) when a new level/save etc. is loaded, current X is loaded in as usual, but previous X is kept, and the interpolation of the two messes things up.
+
+14-5-25
+	* Debug F1 should save settings.cfg each time elaborated.
+	* Always run set to disabled should save to file as well (or save on quit, not doing right now)
+	Shots are fired only on the correct fire frame, instead of as soon as the 
+	* Loading from a save at the end level screen briefly flashes the end level screen reset before displaying the save
+	Knife not reliable when player is super close to non-aggroed guards
+	* Player running with knife out is more nimble and can slip by guards.
+	+ Movement is going too fast compared to 1.2
+	Update cheats on website
+
+
+	== COMMENT ==
+	After much wringing of hands, there is a working interpolation module now.'
+
+	Movement is going too fast because of the following situation:
+	In v1.2 movement would sometimes happen, sometimes not, depending on the accumulator.
+	But since the accumulator is not a factor in the movement, the player advances every frame if they're
+	moving now.
+	So I have to devise a way to cap the movement so that it still updates player x, y every frame BUT it takes into account
+	the fact that moveemnt is guaranteed every frame.
+
+	Now we're reverting back to basic units per second due to this new requirement. Because my demo storing system only stores the RESULTS of playerMove, new demos
+	recorded shouldn't have any further issues.
+
+15-5-25
+	* Side strafe is faster than it should be (additional x?)
+	+ Re-port the Asan / Tsan fixes to Linux version 
+	+ Check all avenues of level loading
+	* Check save game format and ensure transition to v1.3 movement code if necessary 
+	* Change text for achievement to advise player to get their knife out
+	* test controller with new input
+	* strafe on keyboard is "catching"
+	Game promotion with subscribestar Asha + ZoomerHistorian
+	+ Cards check and verify
+	+ (LINUX)	Music downtempo shifts sometimes on e1M1 - probably to do with the pitch shifts not resetting.
+
+	== COMMENT ==
+	Funny how, to correct a rendering quirk, I had to restructure an entire low level component of the engine and retest from the ground up.
+	I must say, it feel and looks much better now, so fair play. Feels great.
+
+	Now I get into threading. My game is not heavily threaded, relying on threading for only some of the heavy rendering portions of the code.
+	However external factors out of my immediate control are, and they've been causing headaches for me for months with unexplained crashes and segfaults.
+
+	Going to ignore a great deal of race conditions from the 3rd party libraries - they haven't caused issues.
+
+16-5-25
+	- Police pain state sprite - check for extra blackness
+	* fluidsynth debug messages suppressed
+	* remove fluidsynth debug.log creation from release
+	* Save file validator doesn't like the new walkSpeed - fix
+	* Great deal of optimisations
+	* FPS Drops randomly
+	* Music transitioning much more natural
+	* Buffer Overflow in graphics_map on German
+	* E1M1 treasure shows on E1M0
+
+	== COMMENT == 
+	Learnt a new command to reveal hidden threads not being reported in the backtrace:
+	thread apply all bt
+
+	Linux sound corruption seems to be fixed - It took unloading and reloadign driver each track change.
+
+	How to see what is being called with how much frequency (not so useful)
+		1) sudo perf record -F 99 -g --call-graph dwarf -- ./bn3d-debug
+		2) sudo perf script -f | ~/FlameGraph/stackcollapse-perf.pl > out.folded
+		3) ~/FlameGraph/flamegraph.pl out.folded > perf.svg
+
+	Game loop now uses high precision timing
+
+17-5-25
+	* Better perfMeasure labels and check for % < 30's.
+	+ Track down elusive < 30 fps drops from seeming no change in level
+
+	== COMMENT == 
+	After a day of fiddling, I think I'm just going to finalise on all systems and release v1.30
+
+18-5-25
+	* mousewheel only changes map view, not FOV
+	On 2nd game over, the hud appears.
+	* blocking math too aggressive, level 2 secret path blocked off.
+	Face Stuck god mode occasionally, E1M6 speedrun this happened
+	* Update Announcements to announce 1.3
+	Make post about custom levels and making ones own
+	README.txt available online and LICENCES.txt	
+	* Release 1.3 to Steam
+	- Steam Deck review to Steam
+
+	== COMMENT ==
+
+	Played a complete game on the Steam Deck - realised i had to tweak the buffer zone to player as it's too restrictive.
+	Some small bugs in game - not really gonna bother repairing them
+
+	Every new build done on MacOS needs to have the otool reassign the frameworks to be called from the Frameworks folder, then recodesigned.
+	Run a codesigning check just to make sure before uploading to Steam.
+
+20-5-25
+	320x200 resolution doesn't boot the game
+	Sound attenuation isn't calculated 100% correctly
+	Player grunts?
