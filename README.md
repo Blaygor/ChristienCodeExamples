@@ -10,3 +10,7 @@ The second section is the folder Private Language Teachers - this is a website t
 
 The third section are the devlogs for the last two games Pelican Blue Software (my software studio) has produced, with the latter slated for release some time in Q3 2026. I include these merely so you can get a raw, honest insight into how I tackle large, complex projects and my thinking process as I go from day to day.
 
+OTHER LINKS:
+https://www.youtube.com/watch?v=gtNcjAFqd0g - Private Teacher showcase video
+https://www.bolsheviktion3d.com - Bolsheviktion 3D's official website
+https://store.steampowered.com/app/3575610/Bolsheviktion_3D/ - Bolsheviktion 3D's official Steam Page
